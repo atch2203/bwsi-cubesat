@@ -1,9 +1,10 @@
 from btcon import BTCon
+import sys
 
 print("connect as client or host")
-type = input()
+type = sys.argv[1] 
 print("what is the hostname of the other pi?")
-other_pi = input()
+other_pi = sys.argv[2]
 if type == "client":
     connection = BTCon(other_pi)
     connection.connect_as_client(1)
