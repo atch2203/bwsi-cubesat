@@ -1,4 +1,4 @@
-###To get stuff to run on startup
+# To get stuff to run on startup
 1. Run `touch startup.sh` in the CHARMS directory
 2. Run `crontab -e`
 3. Use nano and add `@reboot $HOME/CHARMS/startup.sh`
