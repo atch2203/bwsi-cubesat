@@ -67,19 +67,22 @@ def yaw_am(accelX,accelY,accelZ,magX,magY,magZ):
     return (180/np.pi)*np.arctan2(magY, magX)
 
 #Activity 2: RPY based on gyroscope
-def roll_gy(prev_angle, delT, gyro):
+def roll_gy(prev_angle, delT, gyro, accDataY):
     #TODO
-    roll = prev_angle + gyro * delT
+    #roll = prev_angle + gyro * delT
+    roll = 0.95 * (prev_angle + gyro*delT) + (0.05) * (accDataY)
     return roll
 
-def pitch_gy(prev_angle, delT, gyro):
+def pitch_gy(prev_angle, delT, gyro, accDataX):
     #TODO
-    pitch = prev_angle + gyro * delT
+    #pitch = prev_angle + gyro * delT
+    pitch = 0.95 * (prev_angle + gyro * delT) + (0.05) * (accDataX)
     return pitch
     
-def yaw_gy(prev_angle, delT, gyro):
+def yaw_gy(prev_angle, delT, gyro, accDataZ):
     #TODO
-    yaw = prev_angle + gyro * delT
+    #yaw = prev_angle + gyro * delT
+    yaw = 0.95 * (prev_angle + gyro * delT) + (0.05) * (accDataZ)
     return yaw
 
 def set_initial(mag_offset):
@@ -169,7 +172,7 @@ def calibrate_gyro():
     key_listener = KeyListener()
     key_listener.start()
     #TODO
-    offset = [0.0022, 0.0053, 0.0111]
+    offset = [0, 0, 0]
 
     gyro_x, gyro_y, gyro_z = sensor2.gyroscope
     min_x = max_x = gyro_x
@@ -222,9 +225,9 @@ def calibrate_gyro():
         print("")
 
     gyro_calibration = (offset_x, offset_y, offset_z)
-    offset[0] = offset_x
-    offset[1] = offset_y
-    offset[2] = offset_z
+    offset[0] = (180/np.pi) * offset_x 
+    offset[1] = (180/np.pi) * offset_y
+    offset[2] = (180/np.pi) * offset_z
 
     print("Calibration complete.")
     return offset

@@ -32,6 +32,7 @@ class KeyListener:
         if not self._listener_thread.is_alive():
             self._listener_thread.start()
 
+
     def stop(self):
         """Stop Listening"""
         if self._listener_thread is not None and self._listener_thread.is_alive():

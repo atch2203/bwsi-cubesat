@@ -25,7 +25,7 @@ y3 = []
 rpy = [0,0,0]
 
 def animate(i, xs, type,y1,y2,y3, mag_offset, gyro_offset, initial_angle):
-    if len(y1) ==0:
+    if len(y1) == 0:
         prev_ang = initial_angle
     else:
         a = y1[-1]
@@ -33,15 +33,15 @@ def animate(i, xs, type,y1,y2,y3, mag_offset, gyro_offset, initial_angle):
         c = y3[-1]
         prev_ang = [a,b,c]
     accelX, accelY, accelZ = sensor1.accelerometer #m/s^2
-    magX, magY, magZ = sensor1.magnetometer #gauss
+    accmagX, accmagY, accmagZ = sensor1.magnetometer #gauss
     #Calibrate magnetometer readings
-    magX = magX - mag_offset[0]
-    magY = magY - mag_offset[1]
-    magZ = magZ - mag_offset[2]
-    gyroX, gyroY, gyroZ = sensor2.gyroscope #rad/s
-    gyroX = gyroX * (180/np.pi) - gyro_offset[0]
-    gyroY = gyroY * (180/np.pi) - gyro_offset[1]
-    gyroZ = gyroZ * (180/np.pi) - gyro_offset[2]
+    magX = accmagX - mag_offset[0]
+    magY = accmagY - mag_offset[1]
+    magZ = accmagZ - mag_offset[2]
+    accgyroX, accgyroY, accgyroZ = sensor2.gyroscope #rad/s
+    gyroX = accgyroX * (180/np.pi) - gyro_offset[0]
+    gyroY = accgyroY * (180/np.pi) - gyro_offset[1]
+    gyroZ = accgyroZ * (180/np.pi) - gyro_offset[2]
     xs.append(time.time())
 
     if type == 'am':
@@ -62,9 +62,9 @@ def animate(i, xs, type,y1,y2,y3, mag_offset, gyro_offset, initial_angle):
            y3.append(prev_ang[2])
        else:
            delT = xs[-1] - xs[-2]
-           y1.append(roll_gy(prev_ang[0],delT,gyroY))
-           y2.append(pitch_gy(prev_ang[1],delT,gyroX))
-           y3.append(yaw_gy(prev_ang[2],delT,gyroZ))
+           y1.append(roll_gy(prev_ang[0],delT,gyroY,accgyroY))
+           y2.append(pitch_gy(prev_ang[1],delT,gyroX,accgyroX))
+           y3.append(yaw_gy(prev_ang[2],delT,gyroZ,accgyroZ))
 
        ax.clear()
        ax.plot(xs,y1,label = "Roll")
@@ -91,7 +91,6 @@ def plot_data(type = 'am'):
     gyro_offset = calibrate_gyro()
     ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y1,y2,y3,mag_offset,gyro_offset,initial_angle), interval = 1000)
     plt.show()
-
 
 if __name__ == '__main__':
     plot_data(*sys.argv[1:])
