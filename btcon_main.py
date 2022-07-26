@@ -7,7 +7,11 @@ print("what is the hostname of the other pi?")
 other_pi = sys.argv[2]
 if type == "client":
     connection = BTCon(other_pi)
-    connection.connect_as_client(1)
+    for i in range(5):
+        try:
+            connection.connect_as_client(1)
+        except:
+            print("error")
     connection.write_string("hi")
     connection.write_image("saturnpencil.jpg")
     connection.connect_as_host(1)
