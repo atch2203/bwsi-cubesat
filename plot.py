@@ -59,7 +59,7 @@ def animate(i, xs, type,y1,y2,y3, mag_offset, gyro_offset, initial_angle):
        if len(xs) == 1:
            y1.append(prev_ang[0])
            y2.append(prev_ang[1])
-           y3.append(prev_ang[2])
+           y3.append(0)
        else:
            delT = xs[-1] - xs[-2]
            y1.append(roll_gy(prev_ang[0],delT,gyroY,accgyroY))
