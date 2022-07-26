@@ -1,6 +1,9 @@
 from btcon import BTCon
 import sys
 
+with open("/home/pi/test.txt", 'a') as f:
+    f.write("It worked!")
+
 print("connect as client or host")
 type = sys.argv[1] 
 print("what is the hostname of the other pi?")
