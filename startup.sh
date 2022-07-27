@@ -1,4 +1,8 @@
 #! /usr/bin/bash
 sleep 10s
-touch $HOME/donesleep
-python3 $HOME/CHARMS/btcon_main.py client raspberrypi3 > $HOME/btcon.log &
+sudo hciconfig hci0 piscan
+touch $HOME/donesleep.txt
+python3 $HOME/CHARMS/btcon_main.py client raspberrypi4 >> $HOME/btcon.log &
+touch $HOME/ranthing.txt
+sleep 3s
+python3 $HOME/CHARMS/btcon_main.py client raspberrypi4
