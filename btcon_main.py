@@ -15,7 +15,9 @@ if type == "client":
         try:
             if connection.connect_as_client(1):
                 break
+            print("not found")
         except:
+            print("error")
             traceback.print_exc()
     connection.write_string("hi")
     connection.write_image("saturnpencil.jpg")
