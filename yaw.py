@@ -88,7 +88,8 @@ def set_initial(mag_offset):
     pitch = pitch_am(accelX,accelY,accelZ)
     yaw = yaw_am(accelX,accelY,accelZ,magX,magY,magZ)
     print("Initial angle set.")
-    return [roll,pitch,yaw]
+    print(yaw)
+    return yaw
 
 def calibrate_mag():
     key_listener = KeyListener()
@@ -153,6 +154,7 @@ def calibrate_mag():
 
     print("Calibration complete.")
 
+    print(offset)
     return offset
 
 def calibrate_gyro():
