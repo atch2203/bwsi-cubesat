@@ -1,8 +1,5 @@
 from btcon import BTCon
 import sys
-import time
-
-time.sleep(30)
 
 with open("/home/pi/test.txt", 'a') as f:
     f.write("It worked!")
