@@ -68,7 +68,7 @@ class BTCon:
         print("Done searching")
         for addr in nearby_devices:
             print(f"Found address {addr} with name {bluetooth.lookup_name(addr)}")
-            if self.other_name == bluetooth.lookup_name(addr):
+            if self.other_name == bluetooth.lookup_name(addr) || bluetooth.lookup_name(addr) == None:#not good
                 self.other_addr = addr
                 break
        
