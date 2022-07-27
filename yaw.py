@@ -1,4 +1,3 @@
-#sensor_calc.py
 import time
 import threading
 import numpy as np
@@ -49,7 +48,6 @@ class KeyListener:
             result = True
         return result
 
-#Activity 1: RPY based on accelerometer and magnetometer
 def roll_am(accelX,accelY,accelZ):
     #TODO
     roll = np.arctan2(accelY, np.sqrt(np.power(accelX, 2) + np.power(accelZ, 2)))
@@ -62,25 +60,12 @@ def pitch_am(accelX,accelY,accelZ):
 
 def yaw_am(accelX,accelY,accelZ,magX,magY,magZ):
     #TODO
-    #mag_x = magX * np.cos(pitch_am(accelX, accelY, accelZ)) + magY * np.sin(roll_am(accelX, accelY, accelZ)) + magZ * np.cos(roll_am(accelX, accelY, accelZ)) * np.sin(pitch_am(accelX, accelY, accelZ))
-    #mag_y = magY * np.cos(roll_am(accelX, accelY, accelZ)) - magY * np.sin(roll_am(accelX, accelY, accelZ))
-    #return (180/np.pi)*np.arctan2(-mag_y, mag_x)
+    mag_x = magX * np.cos(pitch_am(accelX, accelY, accelZ)) + magY * np.sin(roll_am(accelX, accelY, accelZ)) + magZ * np.cos(roll_am(accelX, accelY, accelZ)) * np.sin(pitch_am(accelX, accelY, accelZ))
+    mag_y = magY * np.cos(roll_am(accelX, accelY, accelZ)) - magY * np.sin(roll_am(accelX, accelY, accelZ))
+    return (180/np.pi)*np.arctan2(-mag_y, mag_x)
 
-    return (180/np.pi)*np.arctan2(magY, magX)
+    #return (180/np.pi)*np.arctan2(magY, magX)
 
-#Activity 2: RPY based on gyroscope
-def roll_gy(prev_angle, delT, gyro, accDataY):
-    #TODO
-    #roll = prev_angle + gyro * delT
-    roll = 0.95 * (prev_angle + gyro*delT) + (0.05) * (accDataY)
-    return roll
-
-def pitch_gy(prev_angle, delT, gyro, accDataX):
-    #TODO
-    #pitch = prev_angle + gyro * delT
-    pitch = 0.95 * (prev_angle + gyro * delT) + (0.05) * (accDataX)
-    return pitch
-    
 def yaw_gy(prev_angle, delT, gyro, accDataZ):
     #TODO
     #yaw = prev_angle + gyro * delT
