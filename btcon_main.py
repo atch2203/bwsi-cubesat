@@ -13,6 +13,7 @@ if type == "client":
     for i in range(5):
         try:
             connection.connect_as_client(1)
+            break
         except:
             print("error")
     connection.write_string("hi")
