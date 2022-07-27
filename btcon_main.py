@@ -1,5 +1,6 @@
 from btcon import BTCon
 import sys
+import traceback
 
 with open("/home/pi/test.txt", 'a') as f:
     f.write("It worked!")
@@ -15,7 +16,7 @@ if type == "client":
             if connection.connect_as_client(1):
                 break
         except:
-            print("error")
+            traceback.print_exc()
     connection.write_string("hi")
     connection.write_image("saturnpencil.jpg")
     connection.connect_as_host(1)
