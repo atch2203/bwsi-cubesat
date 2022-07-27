@@ -41,6 +41,7 @@ class BTCon:
         print("Set as discoverable")
         
         self.server_sock_receive= bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+        self.server_sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_sock_receive.bind(("",port))
         self.server_sock_receive.listen(port)
 
