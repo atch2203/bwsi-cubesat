@@ -90,7 +90,7 @@ class BTCon:
             print(f"Found {self.other_name} with address {self.other_addr}")
 
         self.send_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        self.send_sock.connect((self.other_addr, port))
+        self.send_sock.connect(tuple((self.other_addr, port)))
         print(f"Connected send socket to {self.other_addr}")
         return True
 
