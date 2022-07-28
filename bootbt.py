@@ -14,7 +14,6 @@ def main():
         f.write("done\n")
         connection.write_string("hi")
         f.write("wrote hi\n")
-        f.write("wrote image\n")
         f.write(f"received {connection.receive_string()}")
         connection.close_all_connections()
 
