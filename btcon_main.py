@@ -3,9 +3,7 @@ import sys
 import traceback
 from git_push import commit_and_push 
 
-print("connect as client or host")
 type = sys.argv[1] 
-print("what is the hostname of the other pi?")
 other_pi = sys.argv[2]
 first_time = sys.argv[3]
 if type == "client":
