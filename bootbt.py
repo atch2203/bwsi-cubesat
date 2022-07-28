@@ -2,9 +2,7 @@ from btcon import BTCon
 import sys
 import traceback
 
-def main():
-    other_pi = sys.argv[1]
-    first_time = sys.argv[2]
+def bt_selftest(other_pi, first_time):
     with open("/home/pi/log.txt", 'a') as f:
         f.write("before init\n")
         connection = BTCon(other_pi)
@@ -19,4 +17,6 @@ def main():
         connection.close_all_connections()
 
 if __name__ == "__main__":
-    main()
+    otherpi = sys.argv[1]
+    firsttime = sys.argv[2]
+    bt_selftest(otherpi, firsttime)

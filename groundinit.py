@@ -4,10 +4,8 @@ import traceback
 from git_push import commit_and_push 
 import time
 
-def main():
+def bt_groundtest(other_pi, first_time):
     start_time = time.time()
-    other_pi = sys.argv[1]
-    first_time = sys.argv[2]
     connection = BTCon(other_pi)
     if first_time == "True":
         connection.connect_repeat_as_client(1, 5)
@@ -19,4 +17,6 @@ def main():
     print(time.time() - start_time)
 
 if __name__ == "__main__":
-    main()
+    otherpi = sys.argv[1]
+    firsttime = sys.argv[2]
+    bt_groundtest(otherpi, firsttime)
