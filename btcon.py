@@ -129,7 +129,7 @@ class BTCon:
         size = sys.getsizeof(data)
         self.send_sock.send(size.to_bytes(16, "little"))
         self.send_sock.send(data)
-        print(f"wrote string with size {size}")
+        #print(f"wrote string with size {size}")
         return True
 
     def receive_string(self):
@@ -150,7 +150,7 @@ class BTCon:
         assert self.client_sock_receive is not None #connect before recieving data
         size = int.from_bytes(self.client_sock_receive.recv(1024), "little")
         data = self.client_sock_receive.recv(size)
-        print(f"received string of size {size}")
+        #print(f"received string of size {size}")
         return data.decode("UTF-8")
 
     def write_image(self, img_path):
@@ -171,7 +171,7 @@ class BTCon:
         assert self.send_sock is not None #connect before writing data
         with open(img_path, "rb") as img:
             size = os.path.getsize(img_path)
-            print(f"writing image with size {size}")
+            #print(f"writing image with size {size}")
             self.send_sock.send(size.to_bytes(16, "little"))
             self.send_sock.send(img.read(size))
             self.send_sock.send("done")
