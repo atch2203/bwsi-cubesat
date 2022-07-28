@@ -8,7 +8,11 @@ def main(otherpi):
     while input() != "READY":
         print("not ready")
     connection.write_string("ready")
-    print(f"{connection.receive_string()}")
+    connection.close_all_connections()
+    for i in range (5):
+        print(i)
+        connection.connect_as_host(1)
+        print(f"{connection.receive_string()}")
     connection.close_all_connections()
     
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import bootbt
 from btcon import BTCon
 import sys
 import subprocess
+import time
 
 def main(otherpi):
     print("running connection test")
@@ -10,8 +11,21 @@ def main(otherpi):
     print("connected and waiting for ready")
     connection.receive_string()
     print("ready received")
-    connection.write_string(subprocess.check_output(["vcgencmd", "measure_temp"])) 
     connection.close_all_connections()
+    for i in range(5):
+        print(i)
+        send_telemetry(connection)
+        connection.close_all_connections()
+    connection.close_all_connections()
+    
+def send_telemetry(connection):
+    start_time = time.time()
+    connection.connect_repeat_as_client(1)
+    t = time.localtime()
+    send_data = f"""{time.strftime("%h:%M;%S", t)}
+    {subprocess.check_output(["vcgencmd", "measure_temp"])}"""
+    connection.write_string(send_data)
+    print(time.time() - start_time)
     
     
 if __name__ == "__main__":
