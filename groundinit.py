@@ -5,7 +5,7 @@ from git_push import commit_and_push
 import time
 
 def main():
-    start-time = time.time()
+    start_time = time.time()
     other_pi = sys.argv[1]
     first_time = sys.argv[2]
     connection = BTCon(other_pi)
@@ -15,7 +15,7 @@ def main():
     print(connection.receive_string())
     connection.write_string("hi back")
     connection.close_all_connections()
-    print(time.time() - start-time)
+    print(time.time() - start_time)
 
 if __name__ == "__main__":
     main()
