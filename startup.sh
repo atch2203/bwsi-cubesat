@@ -1,4 +1,7 @@
 #! /usr/bin/bash
+timestamp=$(date +%c)
+touch $HOME/boot.txt
+echo "$timestamp" > $HOME/boot.txt
 sleep 10s
 sudo hciconfig hci0 piscan
 touch $HOME/donesleep.txt
