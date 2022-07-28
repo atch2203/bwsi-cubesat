@@ -1,6 +1,7 @@
 import bootbt
 from btcon import BTCon
 import sys
+import subprocess
 
 def main(otherpi):
     print("running connection test")
@@ -9,6 +10,7 @@ def main(otherpi):
     print("connected and waiting for ready")
     connection.receive_string()
     print("ready received")
+    connection.write_string(subprocess.call(["vcgencmd", "measure_temp"])) 
     connection.close_all_connections()
     
     
