@@ -20,7 +20,7 @@ def main(otherpi):
     
 def send_telemetry(connection):
     start_time = time.time()
-    connection.connect_repeat_as_client(1)
+    connection.connect_repeat_as_client(1, 3)
     t = time.localtime()
     send_data = f"""{time.strftime("%h:%M;%S", t)}
     {subprocess.check_output(["vcgencmd", "measure_temp"])}"""
