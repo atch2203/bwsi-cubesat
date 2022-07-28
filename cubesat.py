@@ -10,7 +10,7 @@ def main(otherpi):
     print("connected and waiting for ready")
     connection.receive_string()
     print("ready received")
-    connection.write_string(subprocess.call(["vcgencmd", "measure_temp"])) 
+    connection.write_string(subprocess.check_output(["vcgencmd", "measure_temp"])) 
     connection.close_all_connections()
     
     
