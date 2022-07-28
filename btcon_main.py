@@ -2,6 +2,7 @@ from btcon import BTCon
 import sys
 import traceback
 from git_push import commit_and_push 
+import time
 
 type = sys.argv[1] 
 other_pi = sys.argv[2]
@@ -27,7 +28,9 @@ else:
         connection.connect_repeat_as_client(1, 5)
     connection.connect_as_host(1)
     print(connection.receive_string())
+    start_time = time.time()
     connection.receive_image("test.jpg")
+    print(time.time() - start_time)
     connection.write_string("hi back")
     connection.close_all_connections()
     commit_and_push("test.jpg")
