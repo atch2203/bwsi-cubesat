@@ -13,7 +13,8 @@ def main():
         connection.connect_repeat_as_client(1, 5)
     connection.connect_as_host(1)
     print(connection.receive_string())
-    connection.write_string("hi back")
+    if first_time == "True":
+        connection.write_string("hi back")
     connection.close_all_connections()
     print(time.time() - start_time)
 
