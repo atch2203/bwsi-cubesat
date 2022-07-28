@@ -3,13 +3,13 @@ from btcon import BTCon
 import sys
 
 def main(otherpi):
-    bt_groundtest(otherpi, "True")
+    stationinit.bt_groundtest(otherpi, "True")
     connection = BTCon(otherpi)
     
 if __name__ == "__main__":
-    realRun = sys.argv[1]#whether this is the 1st/2nd time run in startup.sh
-    otherpi = sys.argv[2]#name of other pi hostname
+    otherpi = sys.argv[1]#name of other pi hostname
+    realRun = sys.argv[2]#whether this is the 1st/2nd time run in startup.sh
     if realRun == "True":
         main(otherpi)
     else:
-        bt_groundtest()        
+        stationinit.bt_groundtest(otherpi, "True")        
