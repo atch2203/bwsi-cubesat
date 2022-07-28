@@ -3,12 +3,12 @@ from btcon import BTCon
 import sys
 
 def main(otherpi):
-    stationinit.bt_groundtest(otherpi, "True")
-    connection = BTCon(otherpi)
-    connection.connect_repeat_as_client(1, 5)
+    connection = stationinit.bt_groundtest(otherpi, "True")
     print("Type READY to start")
     while input() != "READY":
+        print("not ready")
     connection.write_string("ready")
+    connection.close_all_connections()
     
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname

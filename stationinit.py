@@ -13,10 +13,10 @@ def bt_groundtest(other_pi, first_time):
     print(connection.receive_string())
     if first_time == "True":
         connection.write_string("hi back")
-    connection.close_all_connections()
     print(time.time() - start_time)
+    return connection
 
 if __name__ == "__main__":
     otherpi = sys.argv[1]
     firsttime = sys.argv[2]
-    bt_groundtest(otherpi, firsttime)
+    bt_groundtest(otherpi, firsttime).close_all_connections()
