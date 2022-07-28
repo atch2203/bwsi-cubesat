@@ -221,8 +221,14 @@ class BTCon:
         Raises:
             AssertionError: raised if this pi has not established both a client and host connection
         """
-        self.close_host()
-        self.close_client()
+        try:
+            self.close_host()
+        except:
+            print("host not init")
+        try:
+            self.close_client()
+        except:
+            print("client not init")
 
     def close_host(self):
         """
