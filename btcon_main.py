@@ -7,11 +7,13 @@ print("connect as client or host")
 type = sys.argv[1] 
 print("what is the hostname of the other pi?")
 other_pi = sys.argv[2]
+first_time = sys.argv[3]
 if type == "client":
     with open("/home/pi/log.txt", 'a') as f:
         f.write("before init")
         connection = BTCon(other_pi)
-        connection.connect_as_host(1)
+        if first_time == "True":
+            connection.connect_as_host(1)
         for i in range(5):
             f.write(f"take {i}")
             try:
@@ -31,10 +33,11 @@ if type == "client":
         connection.close_all_connections()
 else:
     connection = BTCon(other_pi)
-    connection.connect_as_client(1)
+    if first_time == "True":
+        connection.connect_as_client(1)
     connection.connect_as_host(1)
     print(connection.receive_string())
     connection.receive_image("test.jpg")
     connection.write_string("hi back")
     connection.close_all_connections()
-    git_push.commit_and_push("test.jpg")
+    commit_and_push("test.jpg")
