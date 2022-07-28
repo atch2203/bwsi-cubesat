@@ -60,11 +60,11 @@ def pitch_am(accelX,accelY,accelZ):
 
 def yaw_am(accelX,accelY,accelZ,magX,magY,magZ):
     #TODO
-    mag_x = magX * np.cos(pitch_am(accelX, accelY, accelZ)) + magY * np.sin(roll_am(accelX, accelY, accelZ)) + magZ * np.cos(roll_am(accelX, accelY, accelZ)) * np.sin(pitch_am(accelX, accelY, accelZ))
-    mag_y = magY * np.cos(roll_am(accelX, accelY, accelZ)) - magY * np.sin(roll_am(accelX, accelY, accelZ))
-    return (180/np.pi)*np.arctan2(-mag_y, mag_x)
+    #mag_x = magX * np.cos(pitch_am(accelX, accelY, accelZ)) + magY * np.sin(roll_am(accelX, accelY, accelZ)) + magZ * np.cos(roll_am(accelX, accelY, accelZ)) * np.sin(pitch_am(accelX, accelY, accelZ))
+    #mag_y = magY * np.cos(roll_am(accelX, accelY, accelZ)) - magY * np.sin(roll_am(accelX, accelY, accelZ))
+    #return (180/np.pi)*np.arctan2(-mag_y, mag_x)
 
-    #return (180/np.pi)*np.arctan2(magY, magX)
+    return (180/np.pi)*np.arctan2(magY, magX)
 
 def yaw_gy(prev_angle, delT, gyro, accDataZ):
     #TODO
@@ -75,17 +75,15 @@ def yaw_gy(prev_angle, delT, gyro, accDataZ):
 def set_initial(mag_offset):
     #Sets the initial position for plotting and gyro calculations.
     print("Preparing to set initial angle. Please hold the IMU still.")
-    time.sleep(3)
+    time.sleep(5)
     print("Setting angle...")
     accelX, accelY, accelZ = sensor1.accelerometer #m/s^2
     magX, magY, magZ = sensor1.magnetometer #gauss
     #Calibrate magnetometer readings. Defaults to zero until you
     #write the code
-    magX = magX - mag_offset[0]
-    magY = magY - mag_offset[1]
-    magZ = magZ - mag_offset[2]
-    roll = roll_am(accelX, accelY,accelZ)
-    pitch = pitch_am(accelX,accelY,accelZ)
+    magX = (magX - mag_offset[0]) * mag_offset[3]
+    magY = (magY - mag_offset[1]) * mag_offset[4]
+    magZ = (magZ - mag_offset[2]) * mag_offset[5]
     yaw = yaw_am(accelX,accelY,accelZ,magX,magY,magZ)
     print("Initial angle set.")
     print(yaw)
@@ -94,7 +92,6 @@ def set_initial(mag_offset):
 def calibrate_mag():
     key_listener = KeyListener()
     key_listener.start()
-    offset = [0, 0, 0]
 
     print("Magnetometer Calibration")
     print("Start moving the board in all directions")
@@ -130,9 +127,18 @@ def calibrate_mag():
         offset_y = (max_y + min_y) / 2
         offset_z = (max_z + min_z) / 2
 
-        field_x = (max_x - min_x) / 2
-        field_y = (max_y - min_y) / 2
-        field_z = (max_z - min_z) / 2
+        avg_delta_x = (max_x - min_x) / 2
+        avg_delta_y = (max_y - min_y) / 2
+        avg_delta_z = (max_z - min_z) / 2
+
+        avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3
+
+        if avg_delta == 0:
+            continue
+        else:
+            scale_x = avg_delta / avg_delta_x
+            scale_y = avg_delta / avg_delta_y
+            scale_z = avg_delta / avg_delta_z
 
         print(
             "Hard Offset:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
@@ -141,21 +147,18 @@ def calibrate_mag():
         )
         print(
             "Field:        X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
-                field_x, field_y, field_z
+                avg_delta_x, avg_delta_y, avg_delta_z
             )
         )
         print("")
         time.sleep(0.01)
 
-    mag_calibration = (offset_x, offset_y, offset_z)
-    offset[0] = offset_x
-    offset[1] = offset_y
-    offset[2] = offset_z
+    mag_calibration = (offset_x, offset_y, offset_z, scale_x, scale_y, scale_z)
 
     print("Calibration complete.")
 
-    print(offset)
-    return offset
+    print(mag_calibration)
+    return mag_calibration
 
 def calibrate_gyro():
     key_listener = KeyListener()

@@ -25,7 +25,7 @@ rpy = [0,0,0]
 
 def animate(i, xs, type, y, mag_offset, gyro_offset, initial_angle):
     if len(y) == 0:
-        prev_ang = initial_angle
+        prev_ang = 0
     else:
         c = y[-1]
         prev_ang = c
@@ -33,9 +33,9 @@ def animate(i, xs, type, y, mag_offset, gyro_offset, initial_angle):
     accelX, accelY, accelZ = sensor1.accelerometer #m/s^2
     magX, magY, magZ = sensor1.magnetometer #gauss
     #Calibrate magnetometer readings
-    magX = magX - mag_offset[0]
-    magY = magY - mag_offset[1]
-    magZ = magZ - mag_offset[2]
+    magX = (magX - mag_offset[0]) * mag_offset[3]
+    magY = (magY - mag_offset[1]) * mag_offset[4] 
+    magZ = (magZ - mag_offset[2]) * mag_offset[5] 
     accgyroX, accgyroY, accgyroZ = sensor2.gyroscope #rad/s
     gyroX = accgyroX * (180/np.pi) - gyro_offset[0]
     gyroY = accgyroY * (180/np.pi) - gyro_offset[1]
@@ -43,7 +43,7 @@ def animate(i, xs, type, y, mag_offset, gyro_offset, initial_angle):
     xs.append(time.time())
 
     if type == 'am':
-       y.append(yaw_am(accelX,accelY,accelZ,magX,magY,magZ))
+       y.append(yaw_am(accelX,accelY,accelZ,magX,magY,magZ) - initial_angle)
        ax.clear()
        ax.plot(xs,y,label = "Yaw")
        plt.title('Yaw, Using Accelerometer and Magnetometer')
