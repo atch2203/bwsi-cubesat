@@ -4,6 +4,7 @@ import socket
 import os
 import sys
 import traceback
+import time
 # import rsa
 
 class BTCon:
@@ -60,6 +61,16 @@ class BTCon:
                 traceback.print_exc()
                 print("error")  
     
+    def connect_repeat_again_as_client(self, port, repeat):
+        for i in range(repeat):
+            try:
+                time.sleep(0.5)
+                if self.connect_again_as_client(port):
+                    break
+            except:
+                traceback.print_exc()
+                print("error")
+
     def connect_as_client(self, port): #TODO change to dynamic
         """
         Searches for discoverable devices and connects to any with a name matching other_name
@@ -89,6 +100,12 @@ class BTCon:
         else:
             print(f"Found {self.other_name} with address {self.other_addr}")
 
+        self.send_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+        self.send_sock.connect(tuple((self.other_addr, port)))
+        print(f"Connected send socket to {self.other_addr}")
+        return True
+    
+    def connect_again_as_client(self, port):
         self.send_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.send_sock.connect(tuple((self.other_addr, port)))
         print(f"Connected send socket to {self.other_addr}")
