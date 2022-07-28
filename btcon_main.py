@@ -33,4 +33,4 @@ else:
     print(time.time() - start_time)
     connection.write_string("hi back")
     connection.close_all_connections()
-    commit_and_push("test.jpg")
+    #commit_and_push("test.jpg")
