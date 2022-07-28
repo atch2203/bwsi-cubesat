@@ -1,9 +1,9 @@
-import btboot
+import stationinit 
 from btcon import BTCon
 import sys
 
 def main(otherpi):
-    bt_selftest(otherpi, "True")
+    bt_groundtest(otherpi, "True")
     connection = BTCon(otherpi)
     
 if __name__ == "__main__":
@@ -12,4 +12,4 @@ if __name__ == "__main__":
     if realRun == "True":
         main(otherpi)
     else:
-        bt_selftest()        
+        bt_groundtest()        
