@@ -34,7 +34,14 @@ if type == "client":
 else:
     connection = BTCon(other_pi)
     if first_time == "True":
-        connection.connect_as_client(1)
+        for i in range(5):
+            try:
+                if connection.connect_as_client(1):
+                    break
+                print("not found")
+            except:
+                traceback.print_exc()
+                print("error")
     connection.connect_as_host(1)
     print(connection.receive_string())
     connection.receive_image("test.jpg")
