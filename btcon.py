@@ -3,6 +3,7 @@ import subprocess
 import socket
 import os
 import sys
+import traceback
 # import rsa
 
 class BTCon:
@@ -48,6 +49,16 @@ class BTCon:
         self.client_sock_receive, self.other_addr = self.server_sock_receive.accept()
         print(f"Accepted connection from {self.other_addr}")
         return True
+    
+    def connect_repeat_as_client(self, port, repeat):
+        for i in range(repeat):
+            try:
+                if self.connect_as_client(port):
+                    break
+                print("not found")
+            except:
+                traceback.print_exc()
+                print("error")  
     
     def connect_as_client(self, port): #TODO change to dynamic
         """
