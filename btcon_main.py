@@ -1,7 +1,7 @@
 from btcon import BTCon
 import sys
 import traceback
-import git_push import commit_and_push 
+from git_push import commit_and_push 
 
 print("connect as client or host")
 type = sys.argv[1] 
