@@ -1,9 +1,7 @@
 from btcon import BTCon
 import sys
 import traceback
-
-with open("/home/pi/test.txt", 'a') as f:
-    f.write("It worked!")
+import git_push import commit_and_push 
 
 print("connect as client or host")
 type = sys.argv[1] 
@@ -39,3 +37,4 @@ else:
     connection.receive_image("test.jpg")
     connection.write_string("hi back")
     connection.close_all_connections()
+    git_push.commit_and_push("test.jpg")
