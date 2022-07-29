@@ -25,7 +25,7 @@ class Ground:
             if type == "telemetry":
                 print(f"{self.connection.receive_string()}")
             elif type == "image":
-                name = self.connection.receive_raw(1024)
+                name = self.connection.receive_raw()
                 self.connection.receive_image(f"Data/{name}.jpg")
                 with open("Data/{name}.txt", "w") as f:
                     f.write(self.connection.receive_string())

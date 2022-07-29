@@ -20,18 +20,33 @@ class Cubesat:
             time.sleep(1)
             print(i)
             self.connection.connect_repeat_again_as_client(1, 3)
-            self.send_telemetry(self.connection)
+            if i == 3:
+                self.send_image("saturnpencil", 45, 32)
+            else:
+                self.send_telemetry()
             self.connection.close_all_connections()
     
-    def send_telemetry(self, connection):
+    def send_telemetry(self):
         start_time = time.time()
-        connection.write_raw("telemetry")
+        self.connection.write_raw("telemetry")
         t = time.localtime()
-        send_data = f"""{time.strftime("%H:%M:%S", t)}
-        {subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}"""
-        connection.write_string(send_data)
-        connection.write_raw("done")
+        send_data = (f"{time.strftime('%H:%M:%S', t)}\n"
+        f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}")
+        self.connection.write_string(send_data)
+        self.connection.write_raw("done")
         print(time.time() - start_time)
+
+    def send_image(self, name, adcs, hab):
+        start_time = time.time()
+        self.connection.write_raw("image")
+        t = time.localtime()
+        send_data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
+        f"angle: {adcs}\nhab angle:{hab}")
+        self.connection.write_raw(name)
+        self.connection.write_image(f"Images/{name}.jpg")
+        self.connection.write_string(send_data)
+        self.connection.write_raw("done")#change for multiple images, use list parameter
+        
     
     
 if __name__ == "__main__":
