@@ -21,14 +21,14 @@ class Ground:
     def nominal_loop(self):
         self.connection.connect_as_host(1)
         while True:
-            match self.connection.receive_raw():
-                case "telemetry":
-                    print(f"{self.connection.receive_string()}")
-                case "image":
-                    name = self.connection.receive_raw(1024)
-                    self.connection.receive_image(f"Data/{name}.jpg")
-                    with open("Data/{name}.txt", "w") as f:
-                        f.write(self.connection.receive_string())
+            type = self.connection.receive_raw()
+            if type == "telemetry":
+                print(f"{self.connection.receive_string()}")
+            elif type == "image":
+                name = self.connection.receive_raw(1024)
+                self.connection.receive_image(f"Data/{name}.jpg")
+                with open("Data/{name}.txt", "w") as f:
+                    f.write(self.connection.receive_string())
             again = self.connection.receive_raw()
             if again != "again":
                 self.connection.close_all_connections()

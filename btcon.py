@@ -177,7 +177,7 @@ class BTCon:
 
     def receive_raw(self):
         assert self.client_sock_receive is not None #connect before receiving data
-        return self.client_sock-receive.recv(1024).decode("UTF-8")
+        return self.client_sock_receive.recv(1024).decode("UTF-8")
 
     def write_image(self, img_path):
         """
