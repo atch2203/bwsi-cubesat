@@ -11,13 +11,29 @@ class Ground:
         print("Type READY to start")
         while input() != "READY":
             print("not ready")
-        self.connection.write_string("ready")
+        self.connection.write_raw("ready")
         self.connection.close_all_connections()
         for i in range (5):
             print(i)
-            self.connection.connect_as_host(1)
-            print(f"{self.connection.receive_string()}")
+            nominal_loop()
         self.connection.close_all_connections()
+
+    def nominal_loop(self):
+        self.connection.connect_as_host(1)
+        while True:
+            match self.connection.receive_raw():
+                case "telemetry":
+                    print(f"{self.connection.receive_string()}")
+                case "image":
+                    name = self.connection.receive_raw(1024)
+                    self.connection.receive_image(f"Data/{name}.jpg")
+                    with open("Data/{name}.txt", "w") as f:
+                        f.write(self.connection.receive_string())
+            again = self.connection.receive_raw()
+            if again != "again":
+                self.connection.close_all_connections()
+                break
+                    
     
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname

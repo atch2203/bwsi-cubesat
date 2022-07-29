@@ -13,23 +13,24 @@ class Cubesat:
         self.connection=bootbt.bt_selftest(self.otherpi, "True")
         print("test done")
         print("connected and waiting for ready")
-        self.connection.receive_string()
+        self.connection.receive_raw()
         print("ready received")
         self.connection.close_all_connections()
         for i in range(5):
             time.sleep(1)
             print(i)
+            connection.connect_repeat_again_as_client(1, 3)
             self.send_telemetry(self.connection)
             self.connection.close_all_connections()
-        self.connection.close_all_connections()
     
     def send_telemetry(self, connection):
         start_time = time.time()
-        connection.connect_repeat_again_as_client(1, 3)
+        connection.write_raw("telemetry")
         t = time.localtime()
         send_data = f"""{time.strftime("%H:%M:%S", t)}
         {subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}"""
         connection.write_string(send_data)
+        connection.write_raw("done")
         print(time.time() - start_time)
     
     
