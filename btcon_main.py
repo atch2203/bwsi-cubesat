@@ -19,7 +19,7 @@ if type == "client":
         f.write("wrote hi")
         print("wrote hi")
         start_time = time.time() 
-        connection.write_image("/home/pi/CHARMS/saturnpencil.jpg")
+        connection.write_image("/home/pi/CHARMS/Images/saturnpencil.jpg")
         print(time.time() - start_time)
         f.write("wrote image")
         print(f"received {connection.receive_string()}")
