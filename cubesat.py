@@ -19,10 +19,7 @@ class Cubesat:
         for i in range(5):
             time.sleep(1)
             print(i)
-            if i == 4:
-                self.connection.connect_repeat_as_client(1, 5)
-            else:
-                self.connection.connect_repeat_again_as_client(1, 3)
+            self.connection.connect_repeat_again_as_client(1, 3)
             if i == 3:
                 self.send_image("saturnpencil", 45, 32)
             else:

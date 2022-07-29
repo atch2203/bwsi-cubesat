@@ -47,7 +47,8 @@ class BTCon:
         self.server_sock_receive.bind(("",port))
         self.server_sock_receive.listen(port)
 
-        self.client_sock_receive, self.other_addr = self.server_sock_receive.accept()
+        self.client_sock_receive, other_info = self.server_sock_receive.accept()
+        self.other_addr, port = other_info
         print(f"Accepted connection from {self.other_addr}")
         return True
     

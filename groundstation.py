@@ -27,7 +27,7 @@ class Ground:
                 print(f"{self.connection.receive_string()}")
             elif type == "image":
                 time.sleep(1)
-                self.connection.connect_repeat_as_client(2, 3)
+                self.connection.connect_repeat_again_as_client(2, 3)
                 name = self.connection.receive_raw()
                 self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
                 self.connection.write_raw("done")
