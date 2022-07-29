@@ -19,7 +19,7 @@ class Cubesat:
         for i in range(5):
             time.sleep(1)
             print(i)
-            connection.connect_repeat_again_as_client(1, 3)
+            self.connection.connect_repeat_again_as_client(1, 3)
             self.send_telemetry(self.connection)
             self.connection.close_all_connections()
     
