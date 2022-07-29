@@ -26,8 +26,8 @@ class Ground:
                 print(f"{self.connection.receive_string()}")
             elif type == "image":
                 name = self.connection.receive_raw()
-                self.connection.receive_image(f"Data/{name}.jpg")
-                with open(f"Data/{name}.txt", "w") as f:
+                self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
+                with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:
                     data = self.connection.receive_string()
                     f.write(data)
             again = self.connection.receive_raw()

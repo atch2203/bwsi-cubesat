@@ -43,12 +43,10 @@ class Cubesat:
         send_data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {adcs}\nhab angle:{hab}")
         self.connection.write_raw(name)
-        self.connection.write_image(f"Images/{name}.jpg")
+        self.connection.write_image(f"/home/pi/CHARMS/Images/{name}.jpg")
         self.connection.write_string(send_data)
         self.connection.write_raw("done")#change for multiple images, use list parameter
         
-    
-    
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
     realRun = sys.argv[2]#whether this is the 1st/2nd time run in startup.sh
