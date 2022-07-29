@@ -1,6 +1,7 @@
 import stationinit 
 from btcon import BTCon
 import sys
+import time
 
 class Ground:
     def __init__(self, otherpi):
@@ -25,10 +26,13 @@ class Ground:
             if type == "telemetry":
                 print(f"{self.connection.receive_string()}")
             elif type == "image":
+                time.sleep(1)
+                self.connection.connect_repeat_as_client(2, 3)
                 name = self.connection.receive_raw()
                 self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
+                self.connection.write_raw("done")
+                data = self.connection.receive_string()
                 with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:
-                    data = self.connection.receive_string()
                     f.write(data)
             again = self.connection.receive_raw()
             if again != "again":
