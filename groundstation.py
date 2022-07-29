@@ -15,7 +15,7 @@ class Ground:
         self.connection.close_all_connections()
         for i in range (5):
             print(i)
-            nominal_loop()
+            self.nominal_loop()
         self.connection.close_all_connections()
 
     def nominal_loop(self):
