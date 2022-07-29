@@ -27,8 +27,9 @@ class Ground:
             elif type == "image":
                 name = self.connection.receive_raw()
                 self.connection.receive_image(f"Data/{name}.jpg")
-                with open("Data/{name}.txt", "w") as f:
-                    f.write(self.connection.receive_string())
+                with open(f"Data/{name}.txt", "w") as f:
+                    data = self.connection.receive_string()
+                    f.write(data)
             again = self.connection.receive_raw()
             if again != "again":
                 self.connection.close_all_connections()
