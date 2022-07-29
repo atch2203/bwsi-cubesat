@@ -16,7 +16,7 @@ class Ground:
         for i in range (5):
             print(i)
             self.connection.connect_as_host(1)
-            print(f"{connection.receive_string()}")
+            print(f"{self.connection.receive_string()}")
         self.connection.close_all_connections()
     
 if __name__ == "__main__":
