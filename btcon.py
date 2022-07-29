@@ -144,7 +144,7 @@ class BTCon:
         """
         assert self.send_sock is not None #connect before writing data
         size = sys.getsizeof(data)
-        self.send_sock.send(size.to_bytes(16, "little"))
+        self.send_sock.send(size.to_bytes(64, "little"))
         self.send_sock.send(data)
         #print(f"wrote string with size {size}")
         return True
