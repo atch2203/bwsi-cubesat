@@ -169,6 +169,15 @@ class BTCon:
         data = self.client_sock_receive.recv(size)
         #print(f"received string of size {size}")
         return data.decode("UTF-8")
+    
+    def write_raw(self, data):
+        assert self.send_sock is not None #connect before writing data
+        self.send_sock.send(data)
+        return True
+
+    def receive_raw(self):
+        assert self.client_sock_receive is not None #connect before receiving data
+        return self.client_sock-receive.recv(1024).decode("UTF-8")
 
     def write_image(self, img_path):
         """
