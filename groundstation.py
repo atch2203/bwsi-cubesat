@@ -6,18 +6,12 @@ import time
 class Ground:
     def __init__(self, otherpi):
         self.otherpi = otherpi
+        self.orbit = 0
 
     def main(self, otherpi):
-        self.connection = stationinit.bt_groundtest(self.otherpi, "True")
-        print("Type READY to start")
-        while input() != "READY":
-            print("not ready")
-        self.connection.write_raw("ready")
-        self.connection.close_all_connections()
-        for i in range (5):
-            print(i)
+        self.commission()
+        while self.orbit < 10:
             self.nominal_loop()
-        self.connection.close_all_connections()
 
     def nominal_loop(self):
         self.connection.connect_as_host(1)
@@ -27,10 +21,20 @@ class Ground:
                 self.telemetry()
             elif type == "image":
                 self.image()
+            elif type == "sleep":
+                self.orbit = 10
             again = self.connection.receive_raw()
             if again != "again":
                 self.connection.close_all_connections()
                 break
+
+    def commission(self):
+        self.connection = stationinit.bt_groundtest(self.otherpi, "True")
+        print("Type READY to start")
+        while input() != "READY":
+            print("not ready")
+        self.connection.write_raw("ready")
+        self.connection.close_all_connections()
     
     def telemetry(self):
         print(f"{self.connection.receive_string()}")
