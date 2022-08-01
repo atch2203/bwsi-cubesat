@@ -12,7 +12,7 @@ process. Please record these values and save them in a secure place.
 mag_calibration = test.calibrate()
 
 '''
-BEFORE pressing the enter after getting your correct values, make sure
+BEFORE pressing the enter button after getting your correct values, make sure
 to place your cubesat onto the orbiter and point the orbiter at 0 degrees.
 '''
 sleep(5)
