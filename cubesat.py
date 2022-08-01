@@ -13,7 +13,7 @@ class Cubesat:
         self.orbit = 0
 
     def main(self, otherpi):
-        while orbit < 10:
+        while self.orbit < 10:
             if self.state == "nominal":
                 self.nominal() 
             elif self.state == "science":
