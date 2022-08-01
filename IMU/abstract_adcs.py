@@ -102,6 +102,6 @@ class ADCS:
         print(self.angle)
     
     def get_yaw(self):
-        if initial_angle > 0:
+        if self.angle > 0:
             return -1 * (self.calculate_yaw() - self.angle)
         return self.calculate_yaw() - self.angle 
