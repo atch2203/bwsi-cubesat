@@ -123,7 +123,7 @@ class ADCS:
         print(mag_calibration)
         return mag_calibration
    
-    def calculate_yaw(magX, magY, mag_calibration):
+    def calculate_yaw(mag_calibration):
         magX, magY = sensor1.magnetometer #gauss
         #Calibrate magnetometer readings. Defaults to zero until you
         #write the code
