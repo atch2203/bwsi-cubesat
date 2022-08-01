@@ -37,13 +37,13 @@ class Ground:
                     
     def image(self):
         time.sleep(1)
-            self.connection.connect_repeat_again_as_client(2, 3)
-            name = self.connection.receive_raw()
-            self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
-            self.connection.write_raw("done")
-            data = self.connection.receive_string()
-            with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:
-                f.write(data)
+        self.connection.connect_repeat_again_as_client(2, 3)
+        name = self.connection.receive_raw()
+        self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
+        self.connection.write_raw("done")
+        data = self.connection.receive_string()
+        with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:
+            f.write(data)
     
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
