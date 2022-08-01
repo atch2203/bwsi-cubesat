@@ -1,5 +1,5 @@
-import stationinit 
-from btcon import BTCon
+from Comms import stationinit 
+from Comms.btcon import BTCon
 import sys
 import time
 
