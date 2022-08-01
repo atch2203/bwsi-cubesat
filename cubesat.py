@@ -1,5 +1,5 @@
-import bootbt
-from btcon import BTCon
+from Comms import bootbt
+from Comms.btcon import BTCon
 import sys
 import subprocess
 import time

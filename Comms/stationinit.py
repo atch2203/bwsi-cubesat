@@ -1,7 +1,7 @@
-from btcon import BTCon
+from .btcon import BTCon
 import sys
 import traceback
-from git_push import commit_and_push 
+from .git_push import commit_and_push 
 import time
 
 def bt_groundtest(other_pi, first_time):

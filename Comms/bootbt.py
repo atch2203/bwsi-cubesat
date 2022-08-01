@@ -1,4 +1,4 @@
-from btcon import BTCon
+from .btcon import BTCon
 import sys
 import traceback
 
