@@ -24,21 +24,26 @@ class Ground:
         while True:
             type = self.connection.receive_raw()
             if type == "telemetry":
-                print(f"{self.connection.receive_string()}")
+                self.telemetry()
             elif type == "image":
-                time.sleep(1)
-                self.connection.connect_repeat_again_as_client(2, 3)
-                name = self.connection.receive_raw()
-                self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
-                self.connection.write_raw("done")
-                data = self.connection.receive_string()
-                with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:
-                    f.write(data)
+                self.image()
             again = self.connection.receive_raw()
             if again != "again":
                 self.connection.close_all_connections()
                 break
+    
+    def telemetry(self):
+        print(f"{self.connection.receive_string()}")
                     
+    def image(self):
+        time.sleep(1)
+            self.connection.connect_repeat_again_as_client(2, 3)
+            name = self.connection.receive_raw()
+            self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
+            self.connection.write_raw("done")
+            data = self.connection.receive_string()
+            with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:
+                f.write(data)
     
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
