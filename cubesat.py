@@ -47,6 +47,8 @@ class Cubesat:
     def comms(self):
         print("comms")
         self.orbit = self.orbit + 1
+        if self.orbit == 10:
+            self.state = "sleep"
         self.connection.connect_repeat_again_as_client(1, 3)
         self.send_telemetry() 
         self.connection.write_raw("done")
