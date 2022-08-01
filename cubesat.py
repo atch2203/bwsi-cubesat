@@ -1,5 +1,6 @@
 from Comms import bootbt
 from Comms.btcon import BTCon
+from ADCS.adcs_main import ADCS
 import sys
 import subprocess
 import time
@@ -7,6 +8,7 @@ import time
 class Cubesat:
     def __init__(self, otherpi):
         self.otherpi = otherpi
+        self.adcs = ADCS()
 
     def main(self, otherpi):
         print("running connection test")
