@@ -11,6 +11,7 @@ class Cubesat:
         self.adcs = ADCS()
         self.state = "commission"
         self.orbit = 0
+        self.image_queue = []
 
     def main(self, otherpi):
         while self.orbit < 10 and self.state != "sleep":
@@ -32,18 +33,20 @@ class Cubesat:
         while self.state == "nominal": 
             print("nominal")
             time.sleep(1)
-            #add checks for angle, etc to switch state 
+            #TODO: add checks for angle, etc to switch state 
             self.state = "comms"
     
-    def science(self):
+    def science(self): #TODO
         print("science")
         #take image, process it, add adcs data to it
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {adcs}\nhab angle:{hab}")
-        #write data to txt file
+        with open("/home/pi/CHARMS/Images/{name}.txt", "w") as f:
+            f.write(data)
+        #add to self.image_queue depending on quality of image
     
-    def comms(self):
+    def comms(self): #possibly send images here as well
         print("comms")
         self.orbit = self.orbit + 1
         if self.orbit == 10:
@@ -60,12 +63,11 @@ class Cubesat:
         print("connected and waiting for ready")
         self.connection.receive_raw()
         print("ready received")
-        #add init stuff and add 2nd ready/start?
         self.connection.close_all_connections()
         self.state = "nominal"
         
         
-    def error(self):
+    def error(self): #TODO
         print("error")
 
     def sleep(self):
@@ -74,21 +76,19 @@ class Cubesat:
         self.connection.write_raw("sleep")
         self.connection.write_raw("done")
         self.connection.close_all_connections()
-        #shutdown somehow: subprocess?
+        #TODO: shutdown somehow: subprocess?
     
-    def safe(self):
+    def safe(self):#TODO
         print("safe")
     
     def send_telemetry(self): #Connect as client before calling
-        start_time = time.time()
         self.connection.write_raw("telemetry")
         t = time.localtime()
         send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit}\n"
         f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}")
         self.connection.write_string(send_data)
-        print(time.time() - start_time)
 
-    def send_image(self, name, adcs, hab): #connect as client before calling
+    def send_image(self, name): #connect as client before calling
         start_time = time.time()
         self.connection.write_raw("image")
         self.connection.connect_as_host(2)
@@ -98,8 +98,8 @@ class Cubesat:
             reply = self.connection.receive_raw() #DO NOT TRY TO CONNECT AGAIN WHILE THE GROUND STATION IS RECEIVING DATA
             if reply == "done":
                 break #otherwise error received
-        #read txt file and put in write string
-        self.connection.write_string(send_data)
+        with open("/home/pi/CHARMS/Images/{name}.txt", "r") as f:
+            self.connection.write_string(f.read())
         print(time.time() - start_time)
         
 if __name__ == "__main__":
