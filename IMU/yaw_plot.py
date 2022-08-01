@@ -20,19 +20,20 @@ fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
 xs = []
 y = []
+y2 = []
 adcs = ADCS()
 rpy = [0,0,0]
 
-def animate(i, xs, type, y):
-    magX, magY, magZ = sensor1.magnetometer #gauss
-    #Calibrate magnetometer readings
+def animate(i, xs, type, y, y2):
     xs.append(time.time())
 
     if type == 'am':
        adcs.update_yaw_average()
        y.append(adcs.get_yaw())
+       y2.append(adcs.get_raw_yaw())
        ax.clear()
        ax.plot(xs,y,label = "Yaw")
+       ax.plot(xs,y2,label = "Yaw")
        plt.title('Yaw, Using Accelerometer and Magnetometer')
        plt.ylabel('deg')
 
@@ -43,6 +44,7 @@ def animate(i, xs, type, y):
     #Keep the plot from being too long
     xs = xs[-20:]
     y = y[-20:]
+    y2 = y2[-20:]
     plt.grid()
     plt.legend()
     plt.xlabel('Time')
@@ -50,7 +52,7 @@ def animate(i, xs, type, y):
 def plot_data(type = 'am'):
     adcs.calibrate()
     adcs.initial_angle()
-    ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y), interval = 1000)
+    ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y,y2), interval = 1000)
     plt.show()
 
 if __name__ == '__main__':
