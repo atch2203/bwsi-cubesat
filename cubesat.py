@@ -13,7 +13,7 @@ class Cubesat:
         self.orbit = 0
 
     def main(self, otherpi):
-        while self.orbit < 10:
+        while self.orbit < 10 && self.state != "sleep":
             if self.state == "nominal":
                 self.nominal() 
             elif self.state == "science":
@@ -24,10 +24,9 @@ class Cubesat:
                 self.commission()
             elif self.state == "error":
                 self.error()
-            elif self.state == "sleep":
-                self.sleep()
             elif self.state == "safe":
                 self.safe()
+        self.sleep()
 
     def nominal(self):
         while self.state == "nominal": 
