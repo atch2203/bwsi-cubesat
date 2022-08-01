@@ -13,7 +13,7 @@ class Cubesat:
         self.orbit = 0
 
     def main(self, otherpi):
-        while self.orbit < 10 && self.state != "sleep":
+        while self.orbit < 10 and self.state != "sleep":
             if self.state == "nominal":
                 self.nominal() 
             elif self.state == "science":
@@ -72,6 +72,7 @@ class Cubesat:
         print("sleep")
         self.connection.connect_repeat_again_as_client(1, 3)
         self.connection.write_raw("sleep")
+        self.connection.write_raw("done")
         self.connection.close_all_connections()
         #shutdown somehow: subprocess?
     
