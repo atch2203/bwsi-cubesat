@@ -59,7 +59,7 @@ class Cubesat:
 
     def commission(self):
         print("commission")
-        self.adcs.commission()
+        self.adcs.calibrate()
         self.adcs.initial_angle()
         print("running connection test")
         self.connection=bootbt.bt_selftest(self.otherpi, "True")
