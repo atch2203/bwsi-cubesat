@@ -9,7 +9,7 @@ import matplotlib.animation as animation
 from matplotlib import style
 import numpy as np
 import sys
-from yaw import *
+from abstract_adcs import ADCS
 
 
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -20,19 +20,17 @@ fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
 xs = []
 y = []
-
+adcs = ADCS()
 rpy = [0,0,0]
 
-def animate(i, xs, type, y, mag_offset, initial_angle):
+def animate(i, xs, type, y):
     magX, magY, magZ = sensor1.magnetometer #gauss
     #Calibrate magnetometer readings
-    magX = (magX - mag_offset[0]) * mag_offset[3]
-    magY = (magY - mag_offset[1]) * mag_offset[4] 
-    magZ = (magZ - mag_offset[2]) * mag_offset[5]
     xs.append(time.time())
 
     if type == 'am':
-       y.append(yaw_am(magX, magY) - initial_angle)
+       adcs.update_yaw_average()
+       y.append(adcs.get_yaw())
        ax.clear()
        ax.plot(xs,y,label = "Yaw")
        plt.title('Yaw, Using Accelerometer and Magnetometer')
@@ -50,9 +48,9 @@ def animate(i, xs, type, y, mag_offset, initial_angle):
     plt.xlabel('Time')
 
 def plot_data(type = 'am'):
-    mag_offset = calibrate_mag()
-    initial_angle = set_initial(mag_offset)
-    ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y,mag_offset,initial_angle), interval = 1000)
+    adcs.calibrate()
+    adcs.initial_angle()
+    ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y), interval = 1000)
     plt.show()
 
 if __name__ == '__main__':

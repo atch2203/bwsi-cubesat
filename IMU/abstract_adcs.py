@@ -100,8 +100,24 @@ class ADCS:
         time.sleep(2)
         print("Initial Angle: ")
         print(self.angle)
+        self.angle_list = np.zeros(16)
+        self.sma_diff_list = np.zeros(4)
     
-    def get_yaw(self):
+    def update_yaw(self):
+        single = self.calculate_yaw() - self.angle 
         if self.angle > 0:
-            return -1 * (self.calculate_yaw() - self.angle)
-        return self.calculate_yaw() - self.angle 
+            single = -1 * (self.calculate_yaw() - self.angle)
+        self.angle_list = np.append(self.angle_list[1:], single)
+
+    def simple_moving_average(self, list, n):
+        return np.mean(list[-n:]) 
+    
+    def update_yaw_average(self):
+        self.update_yaw()
+        sma1 = self.simple_moving_average(self.angle_list, 16)
+        sma2 = self.simple_moving_average(self.angle_list, 8)
+        sma_diff = 2 * sma2 - sma1
+        self.sma_diff_list = np.append(self.sma_diff_list[1:], sma_diff)
+
+    def get_yaw(self):
+        return self.simple_moving_average(self.sma_diff_list, 4)
