@@ -32,7 +32,6 @@ class Cubesat:
     def nominal(self):
         while self.state == "nominal": 
             print("nominal")
-            print(self.adcs.get_yaw())
             time.sleep(1)
             #TODO: add checks for angle, etc to switch state 
             self.state = "comms"
@@ -42,7 +41,7 @@ class Cubesat:
         #take image, process it, add adcs data to it
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {adcs}\nhab angle:{hab}")
+        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}")
         with open("/home/pi/CHARMS/Images/{name}.txt", "w") as f:
             f.write(data)
         #add to self.image_queue depending on quality of image
@@ -87,7 +86,7 @@ class Cubesat:
     def send_telemetry(self): #Connect as client before calling
         self.connection.write_raw("telemetry")
         t = time.localtime()
-        send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit}\n"
+        send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit}\nangle: {self.adcs.get_yaw()}\n"
         f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}")
         self.connection.write_string(send_data)
 
