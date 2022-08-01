@@ -143,4 +143,6 @@ class ADCS:
         return angle
     
     def get_yaw(self, yaw, initial_angle):
+        if initial_angle > 0:
+            return -1 * (yaw - initial_angle)
         return yaw - initial_angle
