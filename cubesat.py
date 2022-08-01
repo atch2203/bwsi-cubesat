@@ -1,6 +1,6 @@
 from Comms import bootbt
 from Comms.btcon import BTCon
-from IMU.adcs_main import ADCS
+from IMU.abstract_adcs import ADCS
 import sys
 import subprocess
 import time
@@ -32,6 +32,7 @@ class Cubesat:
     def nominal(self):
         while self.state == "nominal": 
             print("nominal")
+            print(self.adcs.get_yaw())
             time.sleep(1)
             #TODO: add checks for angle, etc to switch state 
             self.state = "comms"
@@ -58,6 +59,8 @@ class Cubesat:
 
     def commission(self):
         print("commission")
+        self.adcs.commission()
+        self.adcs.initial_angle()
         print("running connection test")
         self.connection=bootbt.bt_selftest(self.otherpi, "True")
         print("connected and waiting for ready")
