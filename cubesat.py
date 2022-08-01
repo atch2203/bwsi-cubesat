@@ -9,6 +9,7 @@ class Cubesat:
     def __init__(self, otherpi):
         self.otherpi = otherpi
         self.adcs = ADCS()
+        self.state = "commission"
 
     def main(self, otherpi):
         print("running connection test")
@@ -27,6 +28,25 @@ class Cubesat:
             else:
                 self.send_telemetry()
             self.connection.close_all_connections()
+            if self.state == "nominal":
+                print("nominal")
+            elif self.state == "science":
+                print("science")
+            elif self.state == "comms":
+                print("comms")
+            elif self.state == "commission":
+                print("commission")
+            elif self.state == "error":
+                print("error")
+            elif self.state == "sleep":
+                print("sleep")
+            elif self.state == "safe":
+                print("safe")
+
+
+
+
+
     
     def send_telemetry(self): #Connect as client before calling
         start_time = time.time()
