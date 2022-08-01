@@ -50,7 +50,7 @@ class KeyListener:
 
 class ADCS:
 
-    def calibrate():
+    def calibrate(self):
         key_listener = KeyListener()
         key_listener.start()
 
@@ -123,15 +123,14 @@ class ADCS:
         print(mag_calibration)
         return mag_calibration
    
-    def calculate_yaw(mag_calibration):
-        magX, magY = sensor1.magnetometer #gauss
-        #Calibrate magnetometer readings. Defaults to zero until you
-        #write the code
+    def calculate_yaw(self, mag_calibration):
+        magX, magY, magZ = sensor1.magnetometer
         magX = (magX - mag_calibration[0]) * mag_calibration[3]
         magY = (magY - mag_calibration[1]) * mag_calibration[4]
-        return (180/np.pi)*np.arctan2(magY, magX)
+        yaw = (180/np.pi)*np.arctan2(magY, magX)
+        return yaw
 
-    def initial_angle(yaw):
+    def initial_angle(self, yaw):
         #Sets the initial position for plotting and gyro calculations.
         print("Preparing to set initial angle. Please hold the IMU still.")
         time.sleep(5)
@@ -143,5 +142,5 @@ class ADCS:
         print(angle)
         return angle
     
-    def get_yaw(yaw, initial_angle):
+    def get_yaw(self, yaw, initial_angle):
         return yaw - initial_angle
