@@ -15,11 +15,11 @@ class Cubesat:
         self.adcs = ADCS()
         self.state = "commission"
         self.orbit = 0
-        self.orbit_floor = -0.5
+        self.comms_pass = 0
         self.image_queue = []
         self.image_comms = False
         self.time_scale = 8 #seconds per orbit
-        self.cycle = 1 #wait time per nominal cycle
+        self.cycle = 0.5 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
         self.camera = PiCamera()
@@ -42,21 +42,21 @@ class Cubesat:
 
     def nominal(self):
         while self.state == "nominal": 
-            print("nominal")
+            #print("nominal")
             time.sleep(self.cycle)
             self.orbit = (time.time() - self.start_time) / self.time_scale 
-            if self.orbit - self.orbit_floor - 0.5 > 1:
-                self.state = "comms" 
-            if self.orbit > 1 and self.orbit < 3 and np.mod(self.orbit, 0.5) < self.cycle / self.time_scale / 2:
+            if self.orbit > 1 and self.orbit < 3 and np.mod(self.orbit, 0.5) < self.cycle / self.time_scale:
                 self.state = "science" 
+            elif self.orbit > self.comms_pass:
+                self.state = "comms" 
+                self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
             elif self.orbit > 8:
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
-            self.orbit_floor = np.floor(self.orbit) - 0.5 #TODO change this to adapt to HABs being at comm time
     
     def science(self): #TODO
-        print("science")
+        print(f"science {self.orbit}")
         name = f"image_{self.cur_image}"
         self.cur_image = self.cur_image + 1
         hab = 1 #find this from processing
@@ -72,7 +72,7 @@ class Cubesat:
         self.state = "nominal"
     
     def comms(self): 
-        print("comms")
+        print(f"comms {self.orbit}")
         self.connection.connect_repeat_again_as_client(1, 3)
         self.send_telemetry() 
         if self.image_comms:
@@ -80,7 +80,7 @@ class Cubesat:
             self.connection.connect_as_host(2)
             for img in self.image_queue:
                 self.connection.write_raw("again")
-                self.connection.receive_raw()
+                print(self.connection.receive_raw())
                 self.send_image(img)           
             self.image_comms = False
         self.connection.write_raw("done")        
@@ -127,9 +127,10 @@ class Cubesat:
     def send_image(self, name): #connect as client and host before calling
         start_time = time.time()
         self.connection.write_raw("image")
-        self.connection.receive_raw()
+        print(self.connection.receive_raw())
         print(f"sending {name}")
         self.connection.write_raw(name)
+        print(self.connection.receive_raw())
         while True:
             self.connection.write_image(f"/home/pi/CHARMS/Images/{name}.jpg")
             reply = self.connection.receive_raw() #DO NOT TRY TO CONNECT AGAIN WHILE THE GROUND STATION IS RECEIVING DATA
