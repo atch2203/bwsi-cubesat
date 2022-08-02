@@ -82,15 +82,15 @@ class Cubesat:
         print(f"image at angle {self.adcs.get_yaw()}")
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
-        img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
+        habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
         
-        hab = 1 #find this from processing
+        hab_angle = 1 #find this from processing
         dist = 1
 
         #formulate data
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}\nhab distance:{dist}")
+        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab_angle}\nhab distance:{dist}")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
