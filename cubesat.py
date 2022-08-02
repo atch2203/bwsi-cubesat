@@ -192,9 +192,9 @@ class Cubesat:
             self.orbit = (time.time() - self.start_time) / self.time_scale 
             orbit_adcs = self.adcs.get_yaw()
             #correct for imprecision in orbit
-            if np.mod(self.orbit, 1) > 0.5 and orbit_adcs < 180:
+            if np.mod(self.orbit, 1) > 0.3 and orbit_adcs < 100:
                 orbit_adcs = orbit_adcs + 360
-            elif np.mod(self.orbit, 1) < 0.5 and orbit_adcs > 180:
+            elif np.mod(self.orbit, 1) < 0.7 and orbit_adcs > 260:
                 orbit_adcs = orbit_adcs - 360
             self.orbit_adcs = np.floor(self.orbit) + orbit_adcs / 360
             print(self.orbit_adcs)
