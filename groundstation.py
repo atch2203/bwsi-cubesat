@@ -29,7 +29,7 @@ class Ground:
             elif type == "done":
                 break
             again = self.connection.receive_raw()
-            elif again != "again":
+            if again != "again":
                 self.connection.close_all_connections()
                 break
         if self.push:
