@@ -60,11 +60,11 @@ class Cubesat:
         name = f"image_{self.cur_image}"
         hab = 1 #find this from processing
         #take image, process it, add adcs data to it
-        self.camera.capture("/home/pi/CHARMS/Images/{name}.jpg")
+        self.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}")
-        with open("/home/pi/CHARMS/Images/{name}.txt", "w") as f:
+        with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
             f.write(data)
         #add to self.image_queue depending on quality of image
         self.image_queue.append(name)
@@ -130,7 +130,7 @@ class Cubesat:
             reply = self.connection.receive_raw() #DO NOT TRY TO CONNECT AGAIN WHILE THE GROUND STATION IS RECEIVING DATA
             if reply == "done":
                 break #otherwise error received
-        with open("/home/pi/CHARMS/Images/{name}.txt", "r") as f:
+        with open(f"/home/pi/CHARMS/Images/{name}.txt", "r") as f:
             self.connection.write_string(f.read())
         print(time.time() - start_time)
 
