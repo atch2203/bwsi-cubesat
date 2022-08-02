@@ -9,7 +9,7 @@ import matplotlib.animation as animation
 from matplotlib import style
 import numpy as np
 import sys
-from abstract_adcs import ADCS
+from mag_avg_adcs import ADCS
 
 
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -52,7 +52,7 @@ def animate(i, xs, type, y, y2):
 def plot_data(type = 'am'):
     adcs.calibrate(15)
     adcs.initial_angle(False)
-    ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y,y2), interval = 1000)
+    ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y,y2), interval = 333)
     plt.show()
 
 if __name__ == '__main__':
