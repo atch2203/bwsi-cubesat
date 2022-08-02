@@ -128,7 +128,10 @@ class Cubesat:
         self.connection.connect_as_host(2)
         response = self.connection.receive_raw()
         if response != "no_update":
-            print(f"update {self.connection.receive_string()}")
+            data = self.connection.receive_raw()
+            while data != "done":
+                print(data)
+                data = self.connection.receive_raw() #TODO parse data 
             
 
     def send_image(self, name): #connect as client and host before calling

@@ -1,6 +1,6 @@
 from Comms import stationinit 
 from Comms.btcon import BTCon
-from Comms.git_push import commit_and_push
+from Comms import git_push 
 import sys
 import time
 
@@ -32,9 +32,19 @@ class Ground:
             if again != "again":
                 self.connection.close_all_connections()
                 break
+        git_push.pull()
         if self.push:
             self.push = False
-            commit_and_push("images")
+            git_push.commit_and_push("add images")
+        with open("/home/pi/CHARMS/update.txt", "r") as f:
+            self.update_data = f.readlines()
+        if self.update_data[0] == "yes":
+            self.send = True
+            self.update_data[0] = "no"
+            with open("/home/pi/CHARMS/update.txt", "w") as f:
+                f.writelines(self.update_data)
+            git_push.commit_and_push("read update.txt")
+            
        
 
     def commission(self):
@@ -50,7 +60,9 @@ class Ground:
         self.connection.connect_repeat_again_as_client(2, 3)
         if self.send:
             self.connection.write_raw("update")
-            self.connection.write_raw("fdsa")
+            for l in self.update_data[1:]:
+                self.connection.write_raw(l)
+            self.connection.write_raw("done") 
         else:
             self.connection.write_raw("no_update")
                     
