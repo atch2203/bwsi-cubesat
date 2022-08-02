@@ -1,6 +1,7 @@
 from Comms import bootbt
 from Comms.btcon import BTCon
 from IMU.mag_avg_adcs import ADCS
+from Imaging import imaging_stage_one as img
 import sys
 import subprocess
 import time
@@ -81,9 +82,9 @@ class Cubesat:
         self.connection.connect_repeat_again_as_client(1, 3)
         self.send_telemetry() 
         if self.image_comms:
-            for img in self.image_queue:
+            for image in self.image_queue:
                 self.connection.write_raw("again")
-                self.send_image(img)           
+                self.send_image(image)           
             self.image_comms = False
         self.connection.write_raw("done")        
         self.connection.close_all_connections()
