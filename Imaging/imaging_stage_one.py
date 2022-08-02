@@ -7,6 +7,7 @@ import argparse
 import imutils
 import math
 camera = PiCamera() 
+camera.resolution = (750,670)
 time.sleep(2)
 
 #this entire thing only saves 1 image for now. 
@@ -23,7 +24,7 @@ user = "rhea" #replace with your name
 real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
 E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
 centerOff = 27  
-imu_angle = 0 #TODO get this info
+imu_angle = 90 #TODO get this info
 
 HAB_list = []
 
