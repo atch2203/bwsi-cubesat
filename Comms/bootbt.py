@@ -1,6 +1,7 @@
 from .btcon import BTCon
 import sys
 import traceback
+import time
 
 def bt_selftest(other_pi, first_time):
     with open("/home/pi/log.txt", 'a') as f:
@@ -8,7 +9,8 @@ def bt_selftest(other_pi, first_time):
         connection = BTCon(other_pi)
         if first_time == "True":
             connection.connect_as_host(1)
-        connection.connect_repeat_as_client(1, 5)
+        time.sleep(1)
+        connection.connect_repeat_again_as_client(1, 5)
         f.write("done\n")
         connection.write_string("hi")
         f.write("wrote hi\n")
