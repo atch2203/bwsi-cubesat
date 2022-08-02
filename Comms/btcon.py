@@ -202,7 +202,7 @@ class BTCon:
             self.send_sock.send(size.to_bytes(16, "little"))
             self.send_sock.send(img.read(size))
             self.send_sock.send("done")
-            self.send_sock.send("done2")#just in case
+            print("sent done")
             img.close()
             print(f"sent image at {img_path}")
         return True
@@ -227,11 +227,11 @@ class BTCon:
             size = int.from_bytes(self.client_sock_receive.recv(1024), "little")
             buffer = self.client_sock_receive.recv(1024)
             data = buffer
-            while buffer != "done".encode() and buffer != "done2".encode():
+            cur_size = 1024 
+            while buffer != "done".encode() and cur_size < size:
                buffer = self.client_sock_receive.recv(1024)#receives data in small chunks, it may be possible to do it all at once
                data += buffer
-            if buffer == "done".encode():
-                self.client_sock_receive.recv(1024)
+               cur_size += 1024
             img.write(data)
             img.close()
             print(f"wrote image to {img_path}")
