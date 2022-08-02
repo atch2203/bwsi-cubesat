@@ -9,6 +9,7 @@ class Ground:
         self.otherpi = otherpi
         self.orbit = 0
         self.push = False
+        self.send = False
 
     def main(self, otherpi):
         self.commission()
@@ -28,8 +29,6 @@ class Ground:
             elif type == "done":
                 break
             again = self.connection.receive_raw()
-            if again == "image_first":
-                self.connection.connect_repeat_again_as_client(2, 3)
             elif again != "again":
                 self.connection.close_all_connections()
                 break
@@ -48,6 +47,12 @@ class Ground:
     
     def telemetry(self):
         print(f"{self.connection.receive_string()}")
+        self.connection.connect_repeat_again_as_client(2, 3)
+        if self.send:
+            self.connection.write_raw("update")
+            self.connection.write_raw("fdsa")
+        else:
+            self.connection.write_raw("no_update")
                     
     def image(self):
         self.push = True

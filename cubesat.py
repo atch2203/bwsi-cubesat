@@ -17,8 +17,10 @@ class Cubesat:
         self.orbit = 0
         self.comms_pass = 0
         self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9, 20]) #leave the 20 in there
+        self.process_queue = []
         self.image_queue = []
         self.image_comms = False
+        #orbit constants
         self.time_scale = 6 #seconds per orbit
         self.cycle = 1 #wait time per nominal cycle
         
@@ -62,11 +64,12 @@ class Cubesat:
         name = f"image_{self.cur_image}"
         self.cur_image = self.cur_image + 1
         hab = 1 #find this from processing
+        dist = 1
         #take image, process it, add adcs data to it
         self.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}")
+        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}\nhab distance:{dist}")
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
             f.write(data)
         #add to self.image_queue depending on quality of image
