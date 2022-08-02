@@ -69,9 +69,9 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     low_bound = np.array([155,25,0]) #TODO rhea: fix these
     up_bound = np.array ([179, 255, 255])
     mask = cv2.inRange(hsv_img, low_bound, up_bound)
-    cv2.imshow("mask", mask)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    #cv2.imshow("mask", mask)
+    #cv2.waitKey()
+    #cv2.destroyAllWindows()
 
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)

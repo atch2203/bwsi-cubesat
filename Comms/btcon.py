@@ -224,13 +224,17 @@ class BTCon:
         assert self.client_sock_receive is not None #connect before recieving data
         with open(img_path, "wb") as img:
             size = int.from_bytes(self.client_sock_receive.recv(1024), "little")
-            buffer = self.client_sock_receive.recv(1024)
-            data = buffer
+            data = b"" 
             cur_size = 0 
-            while buffer != "done".encode():
-               buffer = self.client_sock_receive.recv(1024)#receives data in small chunks, it may be possible to do it all at once
-               data += buffer
-               cur_size += 1024
+            while True:
+                buffer = self.client_sock_receive.recv(1024)#receives data in small chunks, it may be possible to do it all at once
+                cur_size = len(buffer)
+                if cur_size == 1016:
+                    data += buffer
+                else:
+                    if buffer != "done".encode():
+                        self.client_sock_receive.recv(1024)
+                    break
             img.write(data)
             img.close()
             print(f"wrote image to {img_path}")
