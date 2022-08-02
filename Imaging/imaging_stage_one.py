@@ -10,7 +10,7 @@ camera = PiCamera()
 time.sleep(2)
 path = "home/pi/CHARMS/Imaging/test_images/"
 user = "rhea" #replace with your name
-HAB_list = {}
+HAB_list = []
 
 class HAB:
     def __init__(self):
@@ -21,7 +21,7 @@ class HAB:
         self.distance = 0
         self.sector = 0
     def __str__(self):
-        return str(self.x), str(self.y)
+        return str(self.x) + " " + str(self.y) + " \n"
     
 
 
@@ -37,25 +37,32 @@ class HAB:
 
 def capture_image(imu_angle):
     #capture image
-    fileName = strftime("%X%x_" + user + ".jpg") #locale date_locale time_time zone
-    image = camera.capture(path + fileName)
+    fileName = user + ".jpg"
+    # fileName = strftime("%X%x_" + user + ".jpg") #locale date_locale time_time zone
+    camera.capture(fileName)
+    # return image
+    return fileName
 
 
 
 
 
 #TODO rhea: fix this part with the constants
-def find_HABs(image, imu_angle, real2Img, E2PicCenter, centerOff):
+def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     #constants
     real2Image_coef = real2Img  #= 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
     eCenter2PicCenter = E2PicCenter #= 271 #mm - subject to change - depending on each person's set-up
     center_offset = centerOff #27 #pixels - subject to change - depending on each person's set-up
-        
+    
+    image = cv2.imread(img)
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     low_bound = np.array([155,25,0]) #TODO rhea: fix these
     up_bound = np.array ([179, 255, 255])
     mask = cv2.inRange(hsv_img, low_bound, up_bound)
-#   cv2.imshow("mask", mask)
+    cv2.imshow("mask", mask)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
 
@@ -67,7 +74,7 @@ def find_HABs(image, imu_angle, real2Img, E2PicCenter, centerOff):
         red+=area
         if(area<threshold):
             continue
-        # cv2.drawContours(image,[c],-1,(0,255,0),3)
+        cv2.drawContours(image,[c],-1,(0,255,0),3)
         M =  cv2.moments(c)
         if M["m00"] == 0:
             cX=0
@@ -77,9 +84,14 @@ def find_HABs(image, imu_angle, real2Img, E2PicCenter, centerOff):
             cY = int(M["m01"] / M["m00"])
             
         #drawing 
-        # cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1)
-        # cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2)
+        cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1)
+        cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2)
+        # cv2.imshow('Red Mask', red_mask)
         
+        # cv2.waitKey()
+        # cv2.destroyAllWindows()
+
+
         # off_set angle of hab from IMU current angle aka camera orientation calculation
         OB = calculateDistance(375, 335 - center_offset, 750, 335 - center_offset) #edge to actual center
         OC = calculateDistance(375, 335 - center_offset, cX, cY) #distance: hab to actual center
@@ -103,11 +115,11 @@ def find_HABs(image, imu_angle, real2Img, E2PicCenter, centerOff):
         temp_hab.distance = AC
         temp_hab.area = area * real2Image_coef
         temp_hab.central_angle = fin_angle = imu_angle + math.degrees(angleBAC)
-        temp_hab.x  = h_x = find_x(fin_angle)
-        temp_hab.y  = h_y = find_y(fin_angle)
+        temp_hab.x  = h_x = find_x(fin_angle, AC)
+        temp_hab.y  = h_y = find_y(fin_angle, AC)
         temp_hab.sector = find_sector(h_x, h_y)
 
-        HAB_list.add(temp_hab)
+        HAB_list.append(temp_hab)
 
         # h_x = self.find_x(self, deg, inch)
         # h_y = self.find_y(self, deg, inch)
@@ -187,10 +199,10 @@ def cosLawSide(angle, b, c):
 
 
 if __name__ == "__main__":
-    img  = #TODO test with an image
-    imu_angle = #TODO get this info
+     #TODO test with an image
+    imu_angle = 0 #TODO get this info
     real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
     E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
     centerOff = 27    
-    find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff)
+    find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
 
