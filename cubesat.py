@@ -8,8 +8,6 @@ import time
 import threading
 import numpy as np
 
-from picamera import PiCamera #delete this
-
 class Cubesat:
     def __init__(self, otherpi):
         self.otherpi = otherpi
@@ -22,11 +20,10 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 6 #seconds per orbit
+        self.time_scale = 10 #seconds per orbit
         self.cycle = 1 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
-        self.camera = PiCamera()
 
     def main(self, otherpi):
         while self.orbit < 10 and self.state != "sleep":
@@ -67,9 +64,9 @@ class Cubesat:
         hab = 1 #find this from processing
         dist = 1
         #take image, process it, add adcs data to it
-        self.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
+        img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         proc_time = time.time()
-        img.find_HABs("/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
+        img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
         print(f"time proc {time.time() - proc_time}")
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"

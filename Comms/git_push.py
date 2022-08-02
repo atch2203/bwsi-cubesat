@@ -2,7 +2,6 @@ from git import Repo
 
 def commit_and_push(message):
     repo = Repo('/home/pi/CHARMS')
-    repo.git.checkout('comms')
     repo.git.add('--all')
     repo.index.commit(f"-Automatic push- {message}")
     print('made the commit')
