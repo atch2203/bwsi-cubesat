@@ -16,10 +16,10 @@ class Cubesat:
         self.state = "commission"
         self.orbit = 0
         self.comms_pass = 0
-        self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9])
+        self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9, 20]) #leave the 20 in there
         self.image_queue = []
         self.image_comms = False
-        self.time_scale = 60 #seconds per orbit
+        self.time_scale = 6 #seconds per orbit
         self.cycle = 1 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -52,7 +52,7 @@ class Cubesat:
             elif self.orbit > self.comms_pass:
                 self.state = "comms" 
                 self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
-            elif self.orbit > 8:
+            elif self.orbit > 4:
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
@@ -81,9 +81,8 @@ class Cubesat:
             self.connection.write_raw("image_first")
             self.connection.connect_as_host(2)
             for img in self.image_queue:
-                self.connection.write_raw("again")
-                print(self.connection.receive_raw())
                 self.send_image(img)           
+                self.connection.write_raw("again")
             self.image_comms = False
         self.connection.write_raw("done")        
         self.connection.close_all_connections()
@@ -91,8 +90,8 @@ class Cubesat:
 
     def commission(self):
         print("commission")
-        self.adcs.calibrate()
-        self.adcs.initial_angle()
+        self.adcs.calibrate(1)
+        self.adcs.initial_angle(True)
         print("running connection test")
         self.connection=bootbt.bt_selftest(self.otherpi, "True")
         print("connected and waiting for ready")
@@ -133,11 +132,8 @@ class Cubesat:
         print(f"sending {name}")
         self.connection.write_raw(name)
         print(self.connection.receive_raw())
-        while True:
-            self.connection.write_image(f"/home/pi/CHARMS/Images/{name}.jpg")
-            reply = self.connection.receive_raw() #DO NOT TRY TO CONNECT AGAIN WHILE THE GROUND STATION IS RECEIVING DATA
-            if reply == "done":
-                break #otherwise error received
+        self.connection.write_image(f"/home/pi/CHARMS/Images/{name}.jpg")
+        self.connection.receive_raw() #DO NOT TRY TO CONNECT AGAIN WHILE THE GROUND STATION IS RECEIVING DATA
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "r") as f:
             self.connection.write_string(f.read())
         print(time.time() - start_time)
