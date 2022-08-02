@@ -1,5 +1,0 @@
-image_1
-17:09:19
-angle: 62.61069434724783
-hab angle:1
-hab distance:1
