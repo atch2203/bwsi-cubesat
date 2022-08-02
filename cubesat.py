@@ -18,7 +18,7 @@ class Cubesat:
         self.comms_pass = 0
         self.prefix = "image"
         #queues for sending
-        self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9]) 
+        self.science_queue = np.array([720+22, 360+53, 90, 360+112, 143, 360+180, 202, 360+233, 270, 360+292, 323, 360+360]) / 360
         self.process_queue = []
         self.image_queue = []
         self.image_comms = False
@@ -77,6 +77,7 @@ class Cubesat:
         name = f"{self.prefix}_{self.cur_image}"
         self.cur_image = self.cur_image + 1
         
+        print(f"image at angle {self.adcs.get_yaw()}")
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
