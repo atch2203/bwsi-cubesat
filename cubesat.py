@@ -16,10 +16,11 @@ class Cubesat:
         self.state = "commission"
         self.orbit = 0
         self.comms_pass = 0
+        self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9])
         self.image_queue = []
         self.image_comms = False
-        self.time_scale = 8 #seconds per orbit
-        self.cycle = 0.5 #wait time per nominal cycle
+        self.time_scale = 60 #seconds per orbit
+        self.cycle = 1 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
         self.camera = PiCamera()
@@ -45,8 +46,9 @@ class Cubesat:
             #print("nominal")
             time.sleep(self.cycle)
             self.orbit = (time.time() - self.start_time) / self.time_scale 
-            if self.orbit > 1 and self.orbit < 3 and np.mod(self.orbit, 0.5) < self.cycle / self.time_scale:
+            if self.orbit > self.science_queue[0]:
                 self.state = "science" 
+                self.science_queue = self.science_queue[1:]
             elif self.orbit > self.comms_pass:
                 self.state = "comms" 
                 self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
