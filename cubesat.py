@@ -4,6 +4,7 @@ from IMU.abstract_adcs import ADCS
 import sys
 import subprocess
 import time
+import threading
 
 class Cubesat:
     def __init__(self, otherpi):
@@ -33,6 +34,7 @@ class Cubesat:
         while self.state == "nominal": 
             print("nominal")
             time.sleep(1)
+            self.orbit = (time.time() - self.start_time) / 60
             #TODO: add checks for angle, etc to switch state 
             self.state = "comms"
     
@@ -66,6 +68,9 @@ class Cubesat:
         self.connection.receive_raw()
         print("ready received")
         self.connection.close_all_connections()
+        self.start_time = time.time()
+        self.adcs_thread = threading.Thread(target=run_adcs, daemon=True)
+        self.adcs_thread.start()
         self.state = "nominal"
         
         
@@ -103,6 +108,12 @@ class Cubesat:
         with open("/home/pi/CHARMS/Images/{name}.txt", "r") as f:
             self.connection.write_string(f.read())
         print(time.time() - start_time)
+
+    def run_adcs(self):
+        while True:
+            time.sleep(0.5)
+            self.adcs.update_yaw_average()
+            print("adcs")
         
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
