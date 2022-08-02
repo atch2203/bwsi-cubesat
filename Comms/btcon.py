@@ -227,7 +227,7 @@ class BTCon:
             buffer = self.client_sock_receive.recv(1024)
             data = buffer
             cur_size = 0 
-            while buffer != "done".encode() and cur_size < size:
+            while buffer != "done".encode():
                buffer = self.client_sock_receive.recv(1024)#receives data in small chunks, it may be possible to do it all at once
                data += buffer
                cur_size += 1024
