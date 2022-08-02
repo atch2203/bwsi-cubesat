@@ -61,7 +61,7 @@ class Cubesat:
                     break
 
             #telemetry packet
-            elif self.orbit_adcs > self.comms_pass:
+            if self.orbit_adcs > self.comms_pass and self.state != "science":
                 self.state = "comms" 
                 self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
 
