@@ -18,10 +18,10 @@ class Cubesat:
         self.orbit_floor = -0.5
         self.image_queue = []
         self.image_comms = False
-        self.cur_image = 1#TODO change this
         self.time_scale = 8 #seconds per orbit
         self.cycle = 1 #wait time per nominal cycle
         
+        self.cur_image = 1#TODO change this
         self.camera = PiCamera()
 
     def main(self, otherpi):
@@ -45,9 +45,9 @@ class Cubesat:
             print("nominal")
             time.sleep(self.cycle)
             self.orbit = (time.time() - self.start_time) / self.time_scale 
-            if self.orbit - self.orbit_floor > 1:
+            if self.orbit - self.orbit_floor - 0.5 > 1:
                 self.state = "comms" 
-            if self.orbit > 1 and self.orbit < 3 and np.mod(self.orbit, 0.5) < self.cycle / self.time_scale:
+            if self.orbit > 1 and self.orbit < 3 and np.mod(self.orbit, 0.5) < self.cycle / self.time_scale / 2:
                 self.state = "science" 
             elif self.orbit > 8:
                 self.state = "comms"
@@ -58,6 +58,7 @@ class Cubesat:
     def science(self): #TODO
         print("science")
         name = f"image_{self.cur_image}"
+        self.cur_image = self.cur_image + 1
         hab = 1 #find this from processing
         #take image, process it, add adcs data to it
         self.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
@@ -79,7 +80,9 @@ class Cubesat:
             self.connection.connect_as_host(2)
             for img in self.image_queue:
                 self.connection.write_raw("again")
-                self.send_image(img)            
+                self.connection.receive_raw()
+                self.send_image(img)           
+            self.image_comms = False
         self.connection.write_raw("done")        
         self.connection.close_all_connections()
         self.state = "nominal"
@@ -124,6 +127,8 @@ class Cubesat:
     def send_image(self, name): #connect as client and host before calling
         start_time = time.time()
         self.connection.write_raw("image")
+        self.connection.receive_raw()
+        print(f"sending {name}")
         self.connection.write_raw(name)
         while True:
             self.connection.write_image(f"/home/pi/CHARMS/Images/{name}.jpg")
