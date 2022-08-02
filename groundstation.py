@@ -23,10 +23,14 @@ class Ground:
                 self.image()
             elif type == "sleep":
                 self.orbit = 10
+            elif type == "again":
+                continue #this is so jank
             again = self.connection.receive_raw()
             if again != "again":
                 self.connection.close_all_connections()
                 break
+            elif again == "image_first":
+                self.connection.connect_repeat_again_as_client(2, 3)
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
@@ -41,7 +45,6 @@ class Ground:
                     
     def image(self):
         time.sleep(1)
-        self.connection.connect_repeat_again_as_client(2, 3)
         name = self.connection.receive_raw()
         self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
         self.connection.write_raw("done")

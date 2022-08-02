@@ -56,7 +56,7 @@ class ADCS:
 
             avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3
 
-            if avg_delta == 0:
+            if avg_delta == 0 or avg_delta_x == 0 or avg_delta_y == 0 or avg_delta_z == 0:
                 continue
             else:
                 scale_x = avg_delta / avg_delta_x
