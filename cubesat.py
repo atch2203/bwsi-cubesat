@@ -60,7 +60,7 @@ class Cubesat:
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
     
-    def science(self): #TODO
+    def science(self):
         print(f"science {self.orbit}")
         name = f"image_{self.cur_image}"
         self.cur_image = self.cur_image + 1
@@ -68,6 +68,9 @@ class Cubesat:
         dist = 1
         #take image, process it, add adcs data to it
         self.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
+        proc_time = time.time()
+        img.find_HABs("/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
+        print(f"time proc {time.time() - proc_time}")
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}\nhab distance:{dist}")
