@@ -24,6 +24,7 @@ class Ground:
             elif type == "sleep":
                 self.orbit = 10
             elif type == "again":
+                self.connection.write_raw("ready")
                 continue #this is so jank
             again = self.connection.receive_raw()
             if again == "image_first":
@@ -31,6 +32,7 @@ class Ground:
             elif again != "again":
                 self.connection.close_all_connections()
                 break
+            self.connection.write_raw("ready")
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
