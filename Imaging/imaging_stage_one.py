@@ -8,8 +8,23 @@ import imutils
 import math
 camera = PiCamera() 
 time.sleep(2)
-path = "home/pi/CHARMS/Imaging/test_images/"
+
+#this entire thing only saves 1 image for now. 
+#supposed to be called for each pahse 1 capture
+
+
+# path = "home/pi/CHARMS/Imaging/test_images/"
+
+'''
+DEPENDANTS:
+'''
+path = "test_images/"
 user = "rhea" #replace with your name
+real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
+E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
+centerOff = 27  
+imu_angle = 0 #TODO get this info
+
 HAB_list = []
 
 class HAB:
@@ -25,23 +40,13 @@ class HAB:
     
 
 
-# class imaging_stage_one:
-    # def __init__(self):
-    #     # self.HAB_list = {}
-    #     self.camera = PiCamera() 
-    #     time.sleep(2) #this can be done on calibration
-    #     self.path = "home/pi/CHARMS/Imaging/test_images/"
-    #     self.user = "rhea" #replace with your name
-
-
-
 def capture_image(imu_angle):
     #capture image
     fileName = user + ".jpg"
     # fileName = strftime("%X%x_" + user + ".jpg") #locale date_locale time_time zone
-    camera.capture(fileName)
+    camera.capture(path + fileName)
     # return image
-    return fileName
+    return path + fileName
 
 
 
@@ -199,10 +204,5 @@ def cosLawSide(angle, b, c):
 
 
 if __name__ == "__main__":
-     #TODO test with an image
-    imu_angle = 0 #TODO get this info
-    real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
-    E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
-    centerOff = 27    
     find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
 
