@@ -69,9 +69,10 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     low_bound = np.array([155,25,0]) #TODO rhea: fix these
     up_bound = np.array ([179, 255, 255])
     mask = cv2.inRange(hsv_img, low_bound, up_bound)
-    #cv2.imshow("mask", mask)
-    #cv2.waitKey()
-    #cv2.destroyAllWindows()
+
+    cv2.imshow("mask", mask)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
 
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
@@ -123,7 +124,7 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
 
         temp_hab = HAB()
         temp_hab.distance = AC
-        temp_hab.area = area * real2Image_coef
+        temp_hab.area = area * real2Image_coef * 282/2392.5 #real2Image is mm not mm^2
         temp_hab.central_angle = fin_angle = imu_angle + math.degrees(angleBAC)
         temp_hab.x  = h_x = find_x(fin_angle, AC)
         temp_hab.y  = h_y = find_y(fin_angle, AC)
@@ -209,5 +210,13 @@ def cosLawSide(angle, b, c):
 
 
 if __name__ == "__main__":
-    find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
+    real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
+    E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
+    centerOff = 27  
+    imu_angle = 0
+    
+    find_HABs("test_images/light3.jpg", imu_angle, real2Img, E2PicCenter, centerOff)
+
+    
+    # find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
 
