@@ -29,16 +29,22 @@ class Ground:
                 self.orbit = 10
             elif type == "done":
                 break
+
+            #check to go again
             again = self.connection.receive_raw()
             if again != "again":
                 self.connection.close_all_connections()
                 break
+        #pull for updates
         git_push.pull()
+        #push images
         if self.push:
             self.push = False
             git_push.commit_and_push("add images")
+        #parse update.txt
         with open("/home/pi/CHARMS/update.txt", "r") as f:
             self.update_data = f.readlines()
+        #change update.txt to no to not repeat update
         if self.update_data[0] == "yes":
             self.send = True
             self.update_data[0] = "no"
@@ -56,7 +62,9 @@ class Ground:
         self.connection.close_all_connections()
     
     def telemetry(self):
+        #receive telemetry
         print(f"{self.connection.receive_string()}")
+        #send updates
         self.connection.connect_repeat_again_as_client(2, 3)
         if self.send:
             self.connection.write_raw("update")
@@ -68,14 +76,18 @@ class Ground:
                     
     def image(self):
         self.push = True
-        print("READY")
         self.connection.write_raw("ready1")
+        
         name = self.connection.receive_raw()
+        
         self.connection.write_raw("ready2")
+        #receive image
         print(f"receiving {name}")
         self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
+        
         print("sending done")
         self.connection.write_raw("done")
+        #receive and write data
         data = self.connection.receive_string()
         with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:
             f.write(data)
