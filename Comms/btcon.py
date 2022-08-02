@@ -201,7 +201,6 @@ class BTCon:
             #print(f"writing image with size {size}")
             self.send_sock.send(size.to_bytes(16, "little"))
             self.send_sock.send(img.read(size))
-            self.send_sock.send("done")
             img.close()
             print(f"sent image at {img_path}")
         return True
@@ -232,8 +231,6 @@ class BTCon:
                 if cur_size == 1016:
                     data += buffer
                 else:
-                    if buffer != "done".encode():
-                        self.client_sock_receive.recv(1024)
                     break
             img.write(data)
             img.close()
