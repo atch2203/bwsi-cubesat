@@ -122,9 +122,9 @@ class ADCS:
         ret = self.calculate_raw_yaw() - self.angle
         if self.angle > 0:
             ret = -ret 
-        if ret > 360:
+        if ret > 370:
             ret -= 360
-        elif ret < 0:
+        elif ret < -10:
             ret += 360
         return ret
 
@@ -132,9 +132,9 @@ class ADCS:
         ret = self.calculate_yaw() - self.angle
         if self.angle > 0:
             ret = -ret
-        if ret > 360:
+        if ret > 370:
             ret -= 360
-        elif ret < 0:
+        elif ret < -10:
             ret += 360
         return ret
     
@@ -158,10 +158,10 @@ class ADCS:
 #        self.sma_diff_listy = np.append(self.sma_diff_listy[1:], sma_diffy)
     
     def get_magX(self):
-        return self.simple_moving_average(self.magX_list, 5)
+        return self.simple_moving_average(self.magX_list, 3)
 
     def get_magY(self):
-        return self.simple_moving_average(self.magY_list, 5)
+        return self.simple_moving_average(self.magY_list, 3)
 
 #    def get_yaw(self):
 #        return min(180, max(-180, self.simple_moving_average(self.sma_diff_list, 2)))

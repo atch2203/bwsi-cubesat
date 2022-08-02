@@ -1,6 +1,6 @@
 from Comms import bootbt
 from Comms.btcon import BTCon
-from IMU.abstract_adcs import ADCS
+from IMU.mag_avg_adcs import ADCS
 import sys
 import subprocess
 import time

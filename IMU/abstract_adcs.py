@@ -107,9 +107,9 @@ class ADCS:
         ret = self.calculate_yaw() - self.angle
         if self.angle > 0:
             ret = self.angle - self.calculate_yaw()
-        if ret > 360:
+        if ret > 370:
             ret -= 360
-        elif ret < 0:
+        elif ret < -10:
             ret += 360
         return ret
     
