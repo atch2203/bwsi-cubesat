@@ -53,11 +53,11 @@ class Cubesat:
             #orbit 5-7: 5 photos max x 2 sec per photo max margin
             for i in self.science_queue:
                 if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
-                    self.science_queue.remove(i)
-                    self.science_queue.append(i+1)
-                if self.orbit_adcs > i:
+                    self.science_queue = self.science_queue[self.science_queue != i]
+                    self.science_queue = np.append(self.science_queue, i+1)
+                elif self.orbit_adcs > i:
                     self.state = "science" 
-                    self.science_queue.remove(i) 
+                    self.science_queue = self.science_queue[self.science_queue != i]
                     break
 
             #telemetry packet
@@ -66,7 +66,7 @@ class Cubesat:
                 self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
 
             #orbit 8-10: transmit 5 images and text file
-            elif self.orbit_adcs > 7:
+            elif self.orbit_adcs > 7 and self.state != "science":
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
