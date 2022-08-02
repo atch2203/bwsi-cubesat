@@ -40,7 +40,8 @@ class Ground:
         #push images
         if self.push:
             self.push = False
-            git_push.commit_and_push("add images")
+            self.push_image_thread = threading.Thread(target=git_push.commit_and_push, args=("add images"))
+            self.push_image_thread.start()
         #parse update.txt
         with open("/home/pi/CHARMS/update.txt", "r") as f:
             self.update_data = f.readlines()
@@ -50,8 +51,8 @@ class Ground:
             self.update_data[0] = "no"
             with open("/home/pi/CHARMS/update.txt", "w") as f:
                 f.writelines(self.update_data)
-            self.push_thread = threading.Thread(target=git_push.commit_and_push, args=("read update.txt"))
-            self.push_thread.start()
+            self.push_update_thread = threading.Thread(target=git_push.commit_and_push, args=("read update.txt"))
+            self.push_update_thread.start()
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
