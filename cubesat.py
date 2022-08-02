@@ -23,7 +23,7 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 10 #seconds per orbit
+        self.time_scale = 60 #seconds per orbit
         self.cycle = 1 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -55,9 +55,11 @@ class Cubesat:
                 if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
                     self.science_queue = self.science_queue[self.science_queue != i]
                     self.science_queue = np.append(self.science_queue, i+1)
+                    print(f"skipped {i}")
                 elif self.orbit_adcs > i:
                     self.state = "science" 
                     self.science_queue = self.science_queue[self.science_queue != i]
+                    print(f"execute {i}")
                     break
 
             #telemetry packet
