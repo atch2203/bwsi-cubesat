@@ -230,7 +230,7 @@ class BTCon:
             while buffer != "done".encode() or buffer != "done2".encode():
                buffer = self.client_sock_receive.recv(1024)#receives data in small chunks, it may be possible to do it all at once
                data += buffer
-            if buffer == "done".encode()
+            if buffer == "done".encode():
                 self.client_sock_receive.recv(1024)
             img.write(data)
             img.close()
