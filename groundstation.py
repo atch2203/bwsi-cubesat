@@ -26,11 +26,11 @@ class Ground:
             elif type == "again":
                 continue #this is so jank
             again = self.connection.receive_raw()
-            if again != "again":
+            if again == "image_first":
+                self.connection.connect_repeat_again_as_client(2, 3)
+            elif again != "again":
                 self.connection.close_all_connections()
                 break
-            elif again == "image_first":
-                self.connection.connect_repeat_again_as_client(2, 3)
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")

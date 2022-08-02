@@ -19,6 +19,8 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         self.cur_image = 1#TODO change this
+        self.time_scale = 8 #seconds per orbit
+        self.cycle = 1 #wait time per nominal cycle
         
         self.camera = PiCamera()
 
@@ -41,13 +43,13 @@ class Cubesat:
     def nominal(self):
         while self.state == "nominal": 
             print("nominal")
-            time.sleep(1)
-            self.orbit = (time.time() - self.start_time) / 8
+            time.sleep(self.cycle)
+            self.orbit = (time.time() - self.start_time) / self.time_scale 
             if self.orbit - self.orbit_floor > 1:
                 self.state = "comms" 
-            if orbit > 1 and orbit < 3 and np.mod(orbit, 0.55) < 0.125:
+            if self.orbit > 1 and self.orbit < 3 and np.mod(self.orbit, 0.5) < self.cycle / self.time_scale:
                 self.state = "science" 
-            elif orbit > 8:
+            elif self.orbit > 8:
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
@@ -58,7 +60,7 @@ class Cubesat:
         name = f"image_{self.cur_image}"
         hab = 1 #find this from processing
         #take image, process it, add adcs data to it
-        camera.capture("/home/pi/CHARMS/Images/{name}.jpg")
+        self.camera.capture("/home/pi/CHARMS/Images/{name}.jpg")
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}")
@@ -66,6 +68,7 @@ class Cubesat:
             f.write(data)
         #add to self.image_queue depending on quality of image
         self.image_queue.append(name)
+        self.state = "nominal"
     
     def comms(self): 
         print("comms")
@@ -79,6 +82,7 @@ class Cubesat:
                 self.send_image(img)            
         self.connection.write_raw("done")        
         self.connection.close_all_connections()
+        self.state = "nominal"
 
     def commission(self):
         print("commission")
@@ -134,7 +138,6 @@ class Cubesat:
         while True:
             time.sleep(0.5)
             self.adcs.update_yaw_average()
-            print("adcs")
         
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
