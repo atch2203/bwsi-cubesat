@@ -93,8 +93,11 @@ class Cubesat:
     def comms(self): 
         print(f"comms {self.orbit}")
         
+        #send packet
         self.connection.connect_repeat_again_as_client(1, 3)
         self.send_telemetry() 
+
+        #send images
         if self.image_comms:
             for image in self.image_queue:
                 self.connection.write_raw("again")
