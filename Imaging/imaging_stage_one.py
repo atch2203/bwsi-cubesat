@@ -125,7 +125,7 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
 
         temp_hab = HAB()
         temp_hab.distance = AC
-        temp_hab.area = area * real2Image_coef * 282/2392.5 #real2Image is mm not mm^2
+        temp_hab.area = area * 282/2392.5 #real2Image is mm not mm^2, this mm^2/pixel
         temp_hab.central_angle = fin_angle = imu_angle + math.degrees(angleBAC)
         temp_hab.x  = h_x = find_x(fin_angle, AC)
         temp_hab.y  = h_y = find_y(fin_angle, AC)
