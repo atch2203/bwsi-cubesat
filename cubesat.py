@@ -14,7 +14,9 @@ class Cubesat:
         self.adcs = ADCS()
         self.state = "commission"
         self.orbit = 0
+        self.orbit_adcs = 0
         self.comms_pass = 0
+        self.prefix = "image"
         #queues for sending
         self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9, 20]) #leave the 20 in there
         self.process_queue = []
@@ -27,7 +29,7 @@ class Cubesat:
         self.cur_image = 1#TODO change this
 
     def main(self, otherpi):
-        while self.orbit < 10 and self.state != "sleep":
+        while self.orbit_adcs < 10 and self.state != "sleep":
             if self.state == "nominal":
                 self.nominal() 
             elif self.state == "science":
@@ -46,28 +48,28 @@ class Cubesat:
         while self.state == "nominal": 
             #print("nominal")
             time.sleep(self.cycle)
-            self.orbit = (time.time() - self.start_time) / self.time_scale 
-            #orbit 1-4: 12 total photos x 2 sec per photo (max margin) to process
+
+            #orbit 1=4: 12 total photos x 2 sec per photo (max margin) to process
             #orbit 5-6: 5 photos max x 2 sec per photo max margin
-            if self.orbit > self.science_queue[0]:
+            if self.orbit_adcs > self.science_queue[0]:
                 self.state = "science" 
                 self.science_queue = self.science_queue[1:]
 
             #telemetry packet
-            elif self.orbit > self.comms_pass:
+            elif self.orbit_adcs > self.comms_pass:
                 self.state = "comms" 
                 self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
 
             #orbit 7-10: transmit 5 images and text file
-            elif self.orbit > 6:
+            elif self.orbit_adcs > 6:
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
     
     def science(self):
-        print(f"science {self.orbit}")
+        print(f"science {self.orbit_adcs}")
         
-        name = f"image_{self.cur_image}"
+        name = f"{self.prefix}_{self.cur_image}"
         self.cur_image = self.cur_image + 1
         
         #take image and process it
@@ -91,7 +93,7 @@ class Cubesat:
         self.state = "nominal"
     
     def comms(self): 
-        print(f"comms {self.orbit}")
+        print(f"comms {self.orbit_adcs}")
         
         #send packet
         self.connection.connect_repeat_again_as_client(1, 3)
@@ -124,7 +126,7 @@ class Cubesat:
         
         #ADCS start, start
         self.start_time = time.time()
-        self.adcs_thread = threading.Thread(target=self.run_adcs, daemon=True)
+        self.adcs_thread = threading.Thread(target=self.background_update, daemon=True)
         self.adcs_thread.start()
         self.state = "nominal"
         
@@ -147,7 +149,7 @@ class Cubesat:
         self.connection.write_raw("telemetry")
         #formulate packet
         t = time.localtime()
-        send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit}\nangle: {self.adcs.get_yaw()}\n"
+        send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit_adcs}\nangle: {self.adcs.get_yaw()}\n"
         f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}")
         
         self.connection.write_string(send_data)
@@ -181,10 +183,21 @@ class Cubesat:
         
         print(time.time() - start_time)
 
-    def run_adcs(self):
+    def background_update(self):
         while True:
-            time.sleep(0.5)
+            time.sleep(0.25)
             self.adcs.update_yaw_average()
+
+            #update orbit
+            self.orbit = (time.time() - self.start_time) / self.time_scale 
+            orbit_adcs = self.adcs.get_yaw()
+            #correct for imprecision in orbit
+            if np.mod(self.orbit, 1) > 0.5 and orbit_adcs < 180:
+                orbit_adcs = orbit_adcs + 360
+            elif np.mod(self.orbit, 1) < 0.5 and orbit_adcs > 180:
+                orbit_adcs = orbit_adcs - 360
+            self.orbit_adcs = np.floor(self.orbit) + orbit_adcs / 360
+            print(self.orbit_adcs)
         
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
