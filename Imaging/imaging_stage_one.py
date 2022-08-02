@@ -21,10 +21,14 @@ DEPENDANTS:
 '''
 path = "test_images/"
 user = "rhea" #replace with your name
-real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
+real2Img = 100/258.49564793241683 # 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up
 E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
-centerOff = 27  
-imu_angle = 90 #TODO get this info
+centerOff = 45 
+
+# real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
+# E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
+# centerOff = 27  
+imu_angle = 0 #TODO get this info
 
 HAB_list = []
 
