@@ -18,7 +18,7 @@ class Cubesat:
         self.comms_pass = 0
         self.prefix = "image"
         #queues for sending
-        self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9, 20]) #leave the 20 in there
+        self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9]) 
         self.process_queue = []
         self.image_queue = []
         self.image_comms = False
@@ -49,19 +49,24 @@ class Cubesat:
             #print("nominal")
             time.sleep(self.cycle)
 
-            #orbit 1=4: 12 total photos x 2 sec per photo (max margin) to process
-            #orbit 5-6: 5 photos max x 2 sec per photo max margin
-            if self.orbit_adcs > self.science_queue[0]:
-                self.state = "science" 
-                self.science_queue = self.science_queue[1:]
+            #orbit 1-4: 12 total photos x 2 sec per photo (max margin) to process
+            #orbit 5-7: 5 photos max x 2 sec per photo max margin
+            for i in self.science_queue:
+                if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
+                    self.science_queue.remove(i)
+                    self.science_queue.append(i+1)
+                if self.orbit_adcs > i:
+                    self.state = "science" 
+                    self.science_queue.remove(i) 
+                    break
 
             #telemetry packet
             elif self.orbit_adcs > self.comms_pass:
                 self.state = "comms" 
                 self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
 
-            #orbit 7-10: transmit 5 images and text file
-            elif self.orbit_adcs > 6:
+            #orbit 8-10: transmit 5 images and text file
+            elif self.orbit_adcs > 7:
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
