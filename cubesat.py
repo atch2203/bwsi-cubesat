@@ -78,11 +78,9 @@ class Cubesat:
         self.connection.connect_repeat_again_as_client(1, 3)
         self.send_telemetry() 
         if self.image_comms:
-            self.connection.write_raw("image_first")
-            self.connection.connect_as_host(2)
             for img in self.image_queue:
-                self.send_image(img)           
                 self.connection.write_raw("again")
+                self.send_image(img)           
             self.image_comms = False
         self.connection.write_raw("done")        
         self.connection.close_all_connections()
@@ -124,6 +122,11 @@ class Cubesat:
         send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit}\nangle: {self.adcs.get_yaw()}\n"
         f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}")
         self.connection.write_string(send_data)
+        self.connection.connect_as_host(2)
+        response = self.connection.receive_raw()
+        if response != "no_update":
+            print(f"update {self.connection.receive_string()}")
+            
 
     def send_image(self, name): #connect as client and host before calling
         start_time = time.time()
