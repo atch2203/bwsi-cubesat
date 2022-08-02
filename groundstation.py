@@ -1,5 +1,6 @@
 from Comms import stationinit 
 from Comms.btcon import BTCon
+from Comms.git_push import commit_and_push
 import sys
 import time
 
@@ -7,6 +8,7 @@ class Ground:
     def __init__(self, otherpi):
         self.otherpi = otherpi
         self.orbit = 0
+        self.push = False
 
     def main(self, otherpi):
         self.commission()
@@ -31,6 +33,10 @@ class Ground:
             elif again != "again":
                 self.connection.close_all_connections()
                 break
+        if self.push:
+            self.push = False
+            commit_and_push("images")
+       
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
@@ -44,6 +50,7 @@ class Ground:
         print(f"{self.connection.receive_string()}")
                     
     def image(self):
+        self.push = True
         print("READY")
         self.connection.write_raw("ready1")
         name = self.connection.receive_raw()
