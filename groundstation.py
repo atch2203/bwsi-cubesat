@@ -3,6 +3,7 @@ from Comms.btcon import BTCon
 from Comms import git_push 
 import sys
 import time
+import threading
 
 class Ground:
     def __init__(self, otherpi):
@@ -43,9 +44,8 @@ class Ground:
             self.update_data[0] = "no"
             with open("/home/pi/CHARMS/update.txt", "w") as f:
                 f.writelines(self.update_data)
-            git_push.commit_and_push("read update.txt")
-            
-       
+            self.push_thread = threading.Thread(target=git_push.commit_and_push, args=("read update.txt"))
+            self.push_thread.start()
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
