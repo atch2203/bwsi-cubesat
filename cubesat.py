@@ -202,7 +202,6 @@ class Cubesat:
             elif np.mod(self.orbit, 1) < 0.7 and orbit_adcs > 260:
                 orbit_adcs = orbit_adcs - 360
             self.orbit_adcs = np.floor(self.orbit) + orbit_adcs / 360
-            print(self.orbit_adcs)
         
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
