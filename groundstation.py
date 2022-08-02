@@ -1,5 +1,6 @@
 from Comms import stationinit 
 from Comms.btcon import BTCon
+from Comms import git_push 
 import sys
 import time
 
@@ -7,6 +8,8 @@ class Ground:
     def __init__(self, otherpi):
         self.otherpi = otherpi
         self.orbit = 0
+        self.push = False
+        self.send = False
 
     def main(self, otherpi):
         self.commission()
@@ -23,16 +26,26 @@ class Ground:
                 self.image()
             elif type == "sleep":
                 self.orbit = 10
-            elif type == "again":
-                self.connection.write_raw("readyjank")
-                continue #this is so jank
+            elif type == "done":
+                break
             again = self.connection.receive_raw()
-            if again == "image_first":
-                self.connection.connect_repeat_again_as_client(2, 3)
-            elif again != "again":
+            if again != "again":
                 self.connection.close_all_connections()
                 break
-            self.connection.write_raw("readyagain")
+        git_push.pull()
+        if self.push:
+            self.push = False
+            git_push.commit_and_push("add images")
+        with open("/home/pi/CHARMS/update.txt", "r") as f:
+            self.update_data = f.readlines()
+        if self.update_data[0] == "yes":
+            self.send = True
+            self.update_data[0] = "no"
+            with open("/home/pi/CHARMS/update.txt", "w") as f:
+                f.writelines(self.update_data)
+            git_push.commit_and_push("read update.txt")
+            
+       
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
@@ -44,13 +57,24 @@ class Ground:
     
     def telemetry(self):
         print(f"{self.connection.receive_string()}")
+        self.connection.connect_repeat_again_as_client(2, 3)
+        if self.send:
+            self.connection.write_raw("update")
+            for l in self.update_data[1:]:
+                self.connection.write_raw(l)
+            self.connection.write_raw("done") 
+        else:
+            self.connection.write_raw("no_update")
                     
     def image(self):
+        self.push = True
         print("READY")
         self.connection.write_raw("ready1")
         name = self.connection.receive_raw()
         self.connection.write_raw("ready2")
+        print(f"receiving {name}")
         self.connection.receive_image(f"/home/pi/CHARMS/Data/{name}.jpg")
+        print("sending done")
         self.connection.write_raw("done")
         data = self.connection.receive_string()
         with open(f"/home/pi/CHARMS/Data/{name}.txt", "w") as f:

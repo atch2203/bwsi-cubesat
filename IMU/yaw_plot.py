@@ -50,8 +50,8 @@ def animate(i, xs, type, y, y2):
     plt.xlabel('Time')
 
 def plot_data(type = 'am'):
-    adcs.calibrate()
-    adcs.initial_angle()
+    adcs.calibrate(15)
+    adcs.initial_angle(False)
     ani = animation.FuncAnimation(fig, animate, fargs =(xs,type,y,y2), interval = 1000)
     plt.show()
 

@@ -15,7 +15,7 @@ sensor2 = adafruit_fxas21002c.FXAS21002C(i2c)
 
 class ADCS:
 
-    def calibrate(self):
+    def calibrate(self, t):
 
         print("Magnetometer Calibration")
         print("Start moving the board in all directions")
@@ -28,7 +28,7 @@ class ADCS:
         min_y = max_y = mag_y
         min_z = max_z = mag_z
 
-        while time.time() - start_time < 15:
+        while time.time() - start_time < t:
             mag_x, mag_y, mag_z = sensor1.magnetometer
 
             print(
@@ -90,14 +90,14 @@ class ADCS:
         yaw = (180/np.pi)*np.arctan2(magY, magX)
         return yaw
 
-    def initial_angle(self):
+    def initial_angle(self, fast):
         #Sets the initial position for plotting and gyro calculations.
         print("Preparing to set initial angle. Please hold the IMU still.")
-        time.sleep(5)
+        time.sleep(0 if fast else 5)
         print("Setting angle...")
         self.angle = self.calculate_yaw()
         print("Initial angle set.")
-        time.sleep(2)
+        time.sleep(0 if fast else 2)
         print("Initial Angle: ")
         print(self.angle)
         self.angle_list = np.zeros(4)
