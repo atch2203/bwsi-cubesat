@@ -5,6 +5,9 @@ import sys
 import subprocess
 import time
 import threading
+import numpy as np
+
+from picamera import PiCamera #delete this
 
 class Cubesat:
     def __init__(self, otherpi):
@@ -12,7 +15,14 @@ class Cubesat:
         self.adcs = ADCS()
         self.state = "commission"
         self.orbit = 0
+        self.comms_pass = 0
         self.image_queue = []
+        self.image_comms = False
+        self.time_scale = 8 #seconds per orbit
+        self.cycle = 0.5 #wait time per nominal cycle
+        
+        self.cur_image = 1#TODO change this
+        self.camera = PiCamera()
 
     def main(self, otherpi):
         while self.orbit < 10 and self.state != "sleep":
@@ -32,31 +42,50 @@ class Cubesat:
 
     def nominal(self):
         while self.state == "nominal": 
-            print("nominal")
-            time.sleep(1)
-            self.orbit = (time.time() - self.start_time) / 60
+            #print("nominal")
+            time.sleep(self.cycle)
+            self.orbit = (time.time() - self.start_time) / self.time_scale 
+            if self.orbit > 1 and self.orbit < 3 and np.mod(self.orbit, 0.5) < self.cycle / self.time_scale:
+                self.state = "science" 
+            elif self.orbit > self.comms_pass:
+                self.state = "comms" 
+                self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
+            elif self.orbit > 8:
+                self.state = "comms"
+                self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
-            self.state = "comms"
     
     def science(self): #TODO
-        print("science")
+        print(f"science {self.orbit}")
+        name = f"image_{self.cur_image}"
+        self.cur_image = self.cur_image + 1
+        hab = 1 #find this from processing
         #take image, process it, add adcs data to it
+        self.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}")
-        with open("/home/pi/CHARMS/Images/{name}.txt", "w") as f:
+        with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
             f.write(data)
         #add to self.image_queue depending on quality of image
+        self.image_queue.append(name)
+        self.state = "nominal"
     
-    def comms(self): #possibly send images here as well
-        print("comms")
-        self.orbit = self.orbit + 1
-        if self.orbit == 10:
-            self.state = "sleep"
+    def comms(self): 
+        print(f"comms {self.orbit}")
         self.connection.connect_repeat_again_as_client(1, 3)
         self.send_telemetry() 
-        self.connection.write_raw("done")
+        if self.image_comms:
+            self.connection.write_raw("image_first")
+            self.connection.connect_as_host(2)
+            for img in self.image_queue:
+                self.connection.write_raw("again")
+                print(self.connection.receive_raw())
+                self.send_image(img)           
+            self.image_comms = False
+        self.connection.write_raw("done")        
         self.connection.close_all_connections()
+        self.state = "nominal"
 
     def commission(self):
         print("commission")
@@ -69,7 +98,7 @@ class Cubesat:
         print("ready received")
         self.connection.close_all_connections()
         self.start_time = time.time()
-        self.adcs_thread = threading.Thread(target=run_adcs, daemon=True)
+        self.adcs_thread = threading.Thread(target=self.run_adcs, daemon=True)
         self.adcs_thread.start()
         self.state = "nominal"
         
@@ -95,17 +124,19 @@ class Cubesat:
         f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}")
         self.connection.write_string(send_data)
 
-    def send_image(self, name): #connect as client before calling
+    def send_image(self, name): #connect as client and host before calling
         start_time = time.time()
         self.connection.write_raw("image")
-        self.connection.connect_as_host(2)
+        print(self.connection.receive_raw())
+        print(f"sending {name}")
         self.connection.write_raw(name)
+        print(self.connection.receive_raw())
         while True:
             self.connection.write_image(f"/home/pi/CHARMS/Images/{name}.jpg")
             reply = self.connection.receive_raw() #DO NOT TRY TO CONNECT AGAIN WHILE THE GROUND STATION IS RECEIVING DATA
             if reply == "done":
                 break #otherwise error received
-        with open("/home/pi/CHARMS/Images/{name}.txt", "r") as f:
+        with open(f"/home/pi/CHARMS/Images/{name}.txt", "r") as f:
             self.connection.write_string(f.read())
         print(time.time() - start_time)
 
@@ -113,7 +144,6 @@ class Cubesat:
         while True:
             time.sleep(0.5)
             self.adcs.update_yaw_average()
-            print("adcs")
         
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
