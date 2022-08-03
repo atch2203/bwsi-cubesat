@@ -1,10 +1,14 @@
 from time import sleep
-import imaging_stage_one as phase1
+# import imaging_stage_one as phase1
 
 #take pic + process --> 2 seconds
 #sleep time --> 8 seconds
 #Angle order: 0-60-120-180-240-300-30-90-150-210-270-330
 #big leap from 300 to 30 degrees 
+
+# phase1.set_user_values("rhea", 100/258.49564793241683, 271, 45)
+# print(phase1.capture_image)
+
 
 time = 0
 zzz = 4

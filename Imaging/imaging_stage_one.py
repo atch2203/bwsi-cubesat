@@ -312,6 +312,40 @@ def set_user_values(username, r2I, E2PC, cenOff):
     E2PicCenter = E2PC
     centerOff = cenOff
 
+#need to actually test this
+#Angle order: 0-60-120-180-240-300-30-90-150-210-270-330
+def flight_test():
+    num_photos  = 0
+    deg_est = 0
+    zzz = 60 / 6
+    #orbit 1
+    orbit_end_deg = 300
+
+    while (orbit_end_deg<=330):
+        while (deg_est<=orbit_end_deg):
+                
+            find_HABs(capture_image(), deg_est)
+            num_photos += 1
+            print(str(num_photos) + "\tdegree: " + str(deg_est) + "\ttime: "+ time.strftime("%H:%M:%S"))
+            deg_est+=60 
+            time.sleep(zzz-1)
+        #it will be at 360=0, so need to take an extra 30/6 = 5 sec
+        time.sleep(30/6)
+        orbit_end_deg+=30 #orbit 2 300+30=330
+    
+    #test cleaning
+    print("done with 2 orbits, checking HAB list")
+    print(*HAB_list)
+    print("\nafter removal: ")
+    print(*remove_doubles())
+    return num_photos
+
+
+
+
+
+
+
 
 '''
 you can use this to set the current imu reading instead of 
@@ -327,6 +361,13 @@ if __name__ == "__main__":
     #THIS LINE SHOULD CHANGE PER PERSON
     set_user_values("rhea", 100/258.49564793241683, 271, 45)
     
+    
+    input('Press enter to start imaging: ')
+    print("started")
+    n = flight_test()
+    print("done imaging, photos total taken: " + str(n))
+
+
     #testing the remove doubles method
     # find_HABs(capture_image(), imu_angle)
     # find_HABs(capture_image(), imu_angle)
