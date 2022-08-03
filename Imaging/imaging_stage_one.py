@@ -10,24 +10,25 @@ camera = PiCamera()
 camera.resolution = (750,670)
 time.sleep(2)
 
-#this entire thing only saves 1 image for now. 
-#supposed to be called for each pahse 1 capture
-
-
 # path = "home/pi/CHARMS/Imaging/test_images/"
 
 '''
 CONSTANTS:
 '''
-path = "test_images/"
-user = "rhea" #replace with your name
-real2Img = 100/258.49564793241683 # 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up
-E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
-centerOff = 45 
+dir_path = "test_images/" #TODO need to figure this out
 
 
 '''
-Figure this out how to change it
+CALL THE SET USER VALUES FUNCTOIN TO SET THESE
+'''
+user = "" 
+real2Img = 1  # mm/pixle - subject to change - depending on each person's set-up
+E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
+centerOff = 1 #subject to change - depending on each person's set-up
+
+
+'''
+call the set imu angle function to change this
 '''
 imu_angle = 0 #TODO get this info
 # real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
@@ -35,7 +36,9 @@ imu_angle = 0 #TODO get this info
 # centerOff = 27  
 
 
-HAB_list = []
+HAB_list = [] #stores all detected HABs (including duplicates)
+
+cleaned_HABs = [] #stores all unique HABs
 
 class HAB:
     def __init__(self):
@@ -54,30 +57,29 @@ class HAB:
         return self.x == other.x and self.y == other.y and self.path == other.path
     
 
-
-def capture_image(imu_angle):
+'''
+captures an image, stores in global path by timestamp
+Returns path to file as string 
+'''
+def capture_image():
     #capture image
-    timestr = time.strftime("%Y%m%d_%H%M%S")
-    fileName = user + timestr + ".jpg"
-    # fileName = strftime("%X%x_" + user + ".jpg") #locale date_locale time_time zone
-    camera.capture(path + fileName)
+    timestr = time.strftime("%Y-%m-%d_%H-%M-%S")
+    fileName = user + "_" + timestr + ".jpg"
+    camera.capture(dir_path + fileName)
     # return image
-    return path + fileName
+    return dir_path + fileName
 
 
-
-
-
-#TODO rhea: fix this part with the constants
 '''
-finds HAB location supplied img path, imu_angle, other constants
-saves hab object 
+finds HAB location supplied img path, imu_angle, (and the global vars)
+saves hab object(s) into HAB_list
+returns a temporary list of just the new HABs from this image 
 '''
-def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
+def find_HABs(img, imu_angle):
     #constants
-    real2Image_coef = real2Img  #= 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
-    eCenter2PicCenter = E2PicCenter #= 271 #mm - subject to change - depending on each person's set-up
-    center_offset = centerOff #27 #pixels - subject to change - depending on each person's set-up
+    real2Image_coef = real2Img  
+    eCenter2PicCenter = E2PicCenter 
+    center_offset = centerOff 
     
     image = cv2.imread(img)
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -85,9 +87,12 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     up_bound = np.array ([179, 255, 255])
     mask = cv2.inRange(hsv_img, low_bound, up_bound)
 
-    cv2.imshow("mask", mask) #comment out after integration
-    cv2.waitKey() #comment out after integration
-    cv2.destroyAllWindows() #comment out after integration
+    #uncomment this if you think something messed up
+    #and you want to see how the mask looks
+
+    # cv2.imshow("mask", mask) #comment out after integration
+    # cv2.waitKey() #comment out after integration
+    # cv2.destroyAllWindows() #comment out after integration
 
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
@@ -111,8 +116,8 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
             cY = int(M["m01"] / M["m00"])
             
         #drawing 
-        cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
-        cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
+        # cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
+        # cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
         # cv2.imshow('Red Mask', red_mask)
         
         # cv2.waitKey()
@@ -166,10 +171,13 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     return ret_habs
 
 
+'''
+given x and y values in inches, determine sector
+coordinte plane is scaled x: [0, 34], y: [0, 33]
+with (0,0) inches at the top left of sector 1
 
-
-
-
+returns sector num 1-6 
+'''
 def find_sector(h_x, h_y):
     
     
@@ -196,10 +204,24 @@ def find_sector(h_x, h_y):
     # return ("Sector: " + str(sector)) 
     return sector
 
+'''
+This function makes a COPY of the HAB_list and returns
+a new list with the duplicates and near duplicates removed
+based on a margin. 
+It also sets the list global var cleaned_HABs for easier
+access as needed.
+
+should handle all HAB_list with lengths 0+
+'''
 
 def remove_doubles():
     in_margin = 1 #sets margin at +-1 inch in all directions from centroid
     new_list = HAB_list[:]
+
+    #handling case of 0 or 1 HABs (nothing to remove)
+    if (len(HAB_list)<=1):
+        return new_list
+
 
     list_len = len(new_list)
     i = 0
@@ -226,14 +248,13 @@ def remove_doubles():
         
         i+=1
 
+    global cleaned_HABs
+    cleaned_HABs = new_list[:]
+
     return new_list
 
 
-
-
-
-        
-
+#helper methods
 
 
 def is_within(x_o, y_o,x_n, y_n, margin):
@@ -242,8 +263,6 @@ def is_within(x_o, y_o,x_n, y_n, margin):
     return False
 
 
-
-#helper methods
 def find_x(deg, inch):
     theta = deg * math.pi / 180
     d = mm_to_in(inch)
@@ -270,24 +289,51 @@ def cosLawAngle(a, b, c):
 def cosLawSide(angle, b, c):
     return math.sqrt(b**2 + c**2 - 2.0*b*c*math.cos(angle)) 
 
+'''
+This can be called to set the global variables specific to the user
+so it only needs to be called once. These values depend on what you
+recorded/used in the imaging calibration (see Stephen's instructions)
+
+username = your first name as a string to set img names
+r2I = mm/pixel ratio
+E2PC = 'earth' to pic center 
+(should be around 271 for everyone since same set up)
+cenOff = the value you adjusted to move the center line as needed
 
 
+eg. set_user_values("rhea", 100/258.49564793241683, 271, 45)
+eg. set_user_values("stephen", 0.3744906844618852, 271, 27)
 
-if __name__ == "__main__":
-    # real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
-    # E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
-    # centerOff = 27  
-    # imu_angle = 0
+'''
+def set_user_values(username, r2I, E2PC, cenOff):
+    global user, real2Img, E2PicCenter, centerOff
+    user = username #this should your first name to set img names
+    real2Img = r2I
+    E2PicCenter = E2PC
+    centerOff = cenOff
+
+
+'''
+you can use this to set the current imu reading instead of 
+changing the global var. we're using angle on a 0 to 360 scale.
+this should probably be called each time you capture an image.
+'''
+def set_pic_angle(angle):
+    global imu_angle
+    imu_angle = angle
+
+if __name__ == "__main__":    
     
-    # find_HABs("test_images/light3.jpg", imu_angle, real2Img, E2PicCenter, centerOff)
-
+    #THIS LINE SHOULD CHANGE PER PERSON
+    set_user_values("rhea", 100/258.49564793241683, 271, 45)
     
-    find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
-    find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
-    print("before removal: ")
-    print(*HAB_list)
-    print("\nafter removal: ")
-    print(*remove_doubles())
-    print("\nold list:")
-    print(*HAB_list)
+    #testing the remove doubles method
+    # find_HABs(capture_image(), imu_angle)
+    # find_HABs(capture_image(), imu_angle)
+    # print("before removal: ")
+    # print(*HAB_list)
+    # print("\nafter removal: ")
+    # print(*remove_doubles())
+    # print("\nold list:")
+    # print(*HAB_list)
 
