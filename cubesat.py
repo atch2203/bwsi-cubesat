@@ -93,8 +93,8 @@ class Cubesat:
         print(f"image at angle {self.adcs.get_yaw()}")
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
-        habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
-        hab_angle, dist, sector = -1
+        habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw())#TODO change constants
+        hab_angle, dist, sector = -1, -1, -1
         if len(habs) > 0:
             hab_angle = habs[0].central_angle #find this from processing
             dist = habs[0].distance
@@ -103,7 +103,8 @@ class Cubesat:
         #formulate data
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}")
+        f"angle: {self.adcs.get_yaw()}"
+        f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}" if sector != -1 else "\nno hab found")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
@@ -141,7 +142,6 @@ class Cubesat:
         
         #ADCS init
         self.adcs.calibrate(10)
-        self.adcs.initial_angle(False)
         
         #Comms test/init
         print("running connection test")
@@ -149,6 +149,10 @@ class Cubesat:
         print("connected and waiting for ready")
         self.connection.receive_raw()
         print("ready received")
+        self.adcs.initial_angle(False)
+        self.connection.write_raw("got_ready")
+        self.connection.receive_raw()
+        print("start received")
         self.connection.close_all_connections()
         
         #ADCS start, start

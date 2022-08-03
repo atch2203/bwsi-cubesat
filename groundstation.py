@@ -56,10 +56,15 @@ class Ground:
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
-        print("Type READY to start")
+        print("Type READY to ready") #init adcs
         while input() != "READY":
             print("not ready")
         self.connection.write_raw("ready")
+        print(f"received {self.connection.receive_raw()}")
+        print("Type START to start")
+        while input() != "START":
+            print("not start")
+        self.connection.write_raw("start")
         self.connection.close_all_connections()
     
     def telemetry(self):
