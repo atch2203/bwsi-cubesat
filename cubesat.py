@@ -83,14 +83,16 @@ class Cubesat:
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
-        
-        hab_angle = 1 #find this from processing
-        dist = 1
+        hab_angle, dist, sector = -1
+        if len(habs) > 0:
+            hab_angle = habs[0].central_angle #find this from processing
+            dist = habs[0].distance
+            sector = habs[0].sector
 
         #formulate data
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab_angle}\nhab distance:{dist}")
+        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
@@ -100,6 +102,12 @@ class Cubesat:
         self.image_queue.append(name)
         self.state = "nominal"
     
+    def add_angle(self, angle):
+        for i in self.science_queue: #there's probably some way to vectorize this
+            if abs(np.floor(angle) - np.floor(i)) < 10 / 360:
+                return False
+        return True
+
     def comms(self): 
         print(f"comms {self.orbit_adcs}")
         
