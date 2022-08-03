@@ -75,7 +75,6 @@ class Cubesat:
             
             #orbit 5-7: 5 photos max x 2 sec per photo max margin
             if self.state != "science":
-                print(self.retake_queue)
                 for i in self.retake_queue:
                     if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
                         self.retake_queue = self.retake_queue[self.retake_queue != i]
@@ -83,6 +82,7 @@ class Cubesat:
                             self.retake_queue = np.append(self.retake_queue, i+1)
                         #print(f"skipped {i},\n orbit is {self.orbit_adcs} and angle is {self.adcs.get_yaw()}")
                     elif self.orbit_adcs > i:
+                        self.prefix = "retake"
                         self.state = "science" 
                         self.retake_queue = self.retake_queue[self.retake_queue != i]
                         print(f"execute {i}")
@@ -108,6 +108,7 @@ class Cubesat:
         print(f"image at angle {self.adcs.get_yaw()}")
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
+        yaw = self.adcs.get_yaw()
         habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw())#TODO change constants
         area, x, y, hab_angle, dist, sector = -1, 0, 0, -1, -1, -1
         if len(habs) > 0:
@@ -123,7 +124,7 @@ class Cubesat:
         t = time.localtime()
         hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}\nx:{x}\ny:{y}\narea:{area}" if sector != -1 else "\nno hab found"
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {self.adcs.get_yaw()}"
+        f"angle: {yaw}"
         f"{hab_data}\n\n")
         
         #write data
