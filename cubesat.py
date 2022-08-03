@@ -103,7 +103,7 @@ class Cubesat:
         hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}" if sector != -1 else "\nno hab found"
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}"
-        f"{hab_data}")
+        f"{hab_data}\n")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
