@@ -55,6 +55,8 @@ class HAB:
         # if not isinstance(other, HAB):
         #     return NotImplemented
         return self.x == other.x and self.y == other.y and self.path == other.path
+    def summary(self):
+        return ("\n-------\nNEW HAB: " + self.path + "\nCENTRAL ANGLE: " + str(self.central_angle) + "\nCOORDINATE: " + str(self) + "\nSECTOR: " + str(self.sector) + "\nAREA: " + str(self.area) + "\nDISTANCE TO CUBESAT: " + str(self.distance))
     
 
 '''
@@ -253,6 +255,11 @@ def remove_doubles():
 
     return new_list
 
+def list_to_txt(this_list, txt_name):
+    with open(dir_path + txt_name, 'w') as file:
+        for hab in this_list:
+            file.write(hab.summary() + "\n")
+
 
 #helper methods
 
@@ -367,7 +374,9 @@ if __name__ == "__main__":
     print("started")
     n = flight_test()
     print("done imaging, photos total taken: " + str(n))
-
+    print("making text file")
+    list_to_txt(cleaned_HABs, "summary.txt")
+    print("finished all processes")
 
     #testing the remove doubles method
     # find_HABs(capture_image(), imu_angle)
