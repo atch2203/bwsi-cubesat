@@ -35,7 +35,7 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 10 #seconds per orbit
+        self.time_scale = 60 #seconds per orbit
         self.cycle = 0.5 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -106,7 +106,7 @@ class Cubesat:
         
         name = f"{self.prefix}_{self.cur_image}"
         if self.prefix == "retake":
-            name = f"{self.prefix}_{self.find_index(self.adcs.get_yaw()/360, self.angle_index, 20)}_{np.floor(self.orbit_adcs)}"
+            name = f"{self.prefix}_{self.find_index(self.adcs.get_yaw()/360, self.angle_index, 16)}_{np.floor(self.orbit_adcs)}"
         else:
             self.cur_image = self.cur_image + 1
        
@@ -142,7 +142,7 @@ class Cubesat:
             if self.prefix == "retake": #don't add initial images
                 self.image_queue.append(name)
             else:
-                if self.find_index(np.mod(self.orbit_adcs, 1), self.angle_index, 10) == -1:
+                if self.find_index(np.mod(self.orbit_adcs, 1), self.angle_index, 16) == -1:
                     self.angle_index = np.append(self.angle_index, np.mod(self.orbit_adcs, 1))
 
             if self.orbit_adcs < 5:
