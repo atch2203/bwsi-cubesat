@@ -85,8 +85,17 @@ def find_HABs(img, imu_angle):
     
     image = cv2.imread(img)
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    low_bound = np.array([155,25,0]) #TODO rhea: fix these
+    # low_bound = np.array([155,25,0])
+    # up_bound = np.array ([179, 255, 255])
+
+    low_bound = np.array([150,50,50])
     up_bound = np.array ([179, 255, 255])
+
+    # low_bound_2 = np.array([150,50,10])
+    # up_bound_2 = np.array ([179, 255, 255])
+
+
+
     mask = cv2.inRange(hsv_img, low_bound, up_bound)
 
     #uncomment this if you think something messed up
@@ -371,15 +380,19 @@ if __name__ == "__main__":
     
     #THIS LINE SHOULD CHANGE PER PERSON
     set_user_values("rhea", 100/258.49564793241683, 271, 45)
-    
-    
-    input('Press enter to start imaging: ')
-    print("started")
-    n = flight_test()
-    print("done imaging, photos total taken: " + str(n))
-    print("making text file")
-    list_to_txt(cleaned_HABs, user + "_summary.txt")
-    print("finished all processes")
+    set_pic_angle(45)
+    #color test
+    find_HABs(capture_image(), imu_angle)
+
+
+    #flight test
+    # input('Press enter to start imaging: ')
+    # print("started")
+    # n = flight_test()
+    # print("done imaging, photos total taken: " + str(n))
+    # print("making text file")
+    # list_to_txt(cleaned_HABs, user + "_summary.txt")
+    # print("finished all processes")
 
     #testing the remove doubles method
     # find_HABs(capture_image(), imu_angle)
