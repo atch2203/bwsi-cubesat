@@ -93,14 +93,8 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     cnts = imutils.grab_contours(cnts)
 
     threshold = 1000
-<<<<<<< HEAD
-    red = 0
-
-    ret_habs = [] #returns only the HABS captured in this img
-=======
     #red = 0 #unnecessary?
     ret_habs = []
->>>>>>> 6659204e78685dc22cffaddb1fa0658388582d22
     
     for c in cnts:
         area = cv2.contourArea(c)
