@@ -24,11 +24,11 @@ user = "rhea" #replace with your name
 real2Img = 100/258.49564793241683 # 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up
 E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
 centerOff = 45 
-
+imu_angle = 0 #TODO get this info
 # real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
 # E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
 # centerOff = 27  
-imu_angle = 0 #TODO get this info
+
 
 HAB_list = []
 
@@ -214,13 +214,13 @@ def cosLawSide(angle, b, c):
 
 
 if __name__ == "__main__":
-    real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
-    E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
-    centerOff = 27  
-    imu_angle = 0
+    # real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
+    # E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
+    # centerOff = 27  
+    # imu_angle = 0
     
-    find_HABs("test_images/light3.jpg", imu_angle, real2Img, E2PicCenter, centerOff)
+    # find_HABs("test_images/light3.jpg", imu_angle, real2Img, E2PicCenter, centerOff)
 
     
-    # find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
+    find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
 
