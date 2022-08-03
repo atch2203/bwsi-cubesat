@@ -32,7 +32,7 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 60 #seconds per orbit
+        self.time_scale = 20 #seconds per orbit
         self.cycle = 1 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -186,13 +186,13 @@ class Cubesat:
         
         self.connection.write_string(send_data)
         #receive updates
-        self.connection.connect_as_host(2)
-        response = self.connection.receive_raw()
-        if response != "no_update":
-            data = self.connection.receive_raw()
-            while data != "done":
-                print(data)
-                data = self.connection.receive_raw() #TODO parse data 
+        #self.connection.connect_as_host(2)
+        #response = self.connection.receive_raw()
+        #if response != "no_update":
+         #   data = self.connection.receive_raw()
+          #  while data != "done":
+           #     print(data)
+            #    data = self.connection.receive_raw() #TODO parse data 
             
 
     def send_image(self, name): #connect as client and host before calling
