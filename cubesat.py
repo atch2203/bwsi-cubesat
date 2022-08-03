@@ -76,7 +76,6 @@ class Cubesat:
             
             #orbit 5-7: 5 photos max x 2 sec per photo max margin
             if self.state != "science":
-                print(self.retake_queue)
                 for i in self.retake_queue:
                     if self.orbit_adcs - i > 10/360: #too late/rotated too much, postpone to next orbit
                         self.retake_queue = self.retake_queue[self.retake_queue != i]
@@ -136,7 +135,7 @@ class Cubesat:
         #add to self.image_queue depending on quality of image
         if sector != -1:
             print("found hab")
-            if self.orbit_adcs > 2: #don't add initial images
+            if self.prefix == "retake": #don't add initial images
                 self.image_queue.append(name)
             if self.orbit_adcs < 5:
                 cur_orbit = np.floor(self.orbit_adcs)
