@@ -87,7 +87,7 @@ class Cubesat:
         
         name = f"{self.prefix}_{self.cur_image}"
         self.cur_image = self.cur_image + 1
-        
+       
         print(f"image at angle {self.adcs.get_yaw()}")
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
@@ -132,6 +132,7 @@ class Cubesat:
             for image in self.image_queue:
                 self.connection.write_raw("again")
                 self.send_image(image)           
+            self.image_queue = []
             self.image_comms = False
         self.connection.write_raw("done")        
         self.connection.close_all_connections()

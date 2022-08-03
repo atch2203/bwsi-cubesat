@@ -120,8 +120,6 @@ class ADCS:
 
     def get_raw_yaw(self):
         ret = self.calculate_raw_yaw() - self.angle
-        if self.angle > 0:
-            ret = -ret 
         if ret > 370:
             ret -= 360
         elif ret < -10:
@@ -130,8 +128,6 @@ class ADCS:
 
     def get_avg_yaw(self):
         ret = self.calculate_yaw() - self.angle
-        if self.angle > 0:
-            ret = -ret
         if ret > 370:
             ret -= 360
         elif ret < -10:
