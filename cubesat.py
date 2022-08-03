@@ -30,7 +30,7 @@ class Cubesat:
         # #revised angle order: 0-60-120-180-240-300-30-90-150-210-270-330
         # #big leap from 300 to 30 degrees 
 
-        self.process_queue = []
+        self.retake_queue = []
         self.image_queue = []
         self.image_comms = False
         #orbit constants
@@ -61,17 +61,31 @@ class Cubesat:
             time.sleep(self.cycle)
 
             #orbit 1-4: 12 total photos x 2 sec per photo (max margin) to process
-            #orbit 5-7: 5 photos max x 2 sec per photo max margin
             for i in self.science_queue:
                 if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
                     self.science_queue = self.science_queue[self.science_queue != i]
-                    self.science_queue = np.append(self.science_queue, i+1)
+                    if i+1 < 7:
+                        self.science_queue = np.append(self.science_queue, i+1)
                     #print(f"skipped {i},\n orbit is {self.orbit_adcs} and angle is {self.adcs.get_yaw()}")
                 elif self.orbit_adcs > i:
                     self.state = "science" 
                     self.science_queue = self.science_queue[self.science_queue != i]
                     print(f"execute {i}")
                     break
+            
+            #orbit 5-7: 5 photos max x 2 sec per photo max margin
+            if self.state != "science":
+                for i in self.retake_queue:
+                    if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
+                        self.retake_queue = self.retake_queue[self.retake_queue != i]
+                        if i+1 < 7:
+                            self.retake_queue = np.append(self.retake_queue, i+1)
+                        #print(f"skipped {i},\n orbit is {self.orbit_adcs} and angle is {self.adcs.get_yaw()}")
+                    elif self.orbit_adcs > i:
+                        self.state = "science" 
+                        self.retake_queue = self.retake_queue[self.retake_queue != i]
+                        print(f"execute {i}")
+                        break
 
             #telemetry packet
             if self.orbit_adcs > self.comms_pass and self.state != "science":
@@ -117,13 +131,18 @@ class Cubesat:
         
         #add to self.image_queue depending on quality of image
         if sector != -1:
-            self.image_queue.append(name)
+            if self.orbit_adcs > 2: #don't add initial images
+                self.image_queue.append(name)
+            if self.orbit_adcs < 5:
+                cur_orbit = np.floor(orbit_adcs)
+                self.add_angle(cur_orbit + 2 + hab_angle/360)
         self.state = "nominal"
     
     def add_angle(self, angle):
-        for i in self.science_queue: #there's probably some way to vectorize this
+        for i in self.retake_queue: #there's probably some way to vectorize this
             if abs(np.floor(angle) - np.floor(i)) < 10 / 360:
                 return False
+        self.retake_queue.append(angle)
         return True
 
     def comms(self): 
