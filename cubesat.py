@@ -62,12 +62,13 @@ class Cubesat:
 
             #orbit 1-4: 12 total photos x 2 sec per photo (max margin) to process
             for i in self.science_queue:
-                if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
+                if self.orbit_adcs - i > 10/360: #too late/rotated too much, postpone to next orbit
                     self.science_queue = self.science_queue[self.science_queue != i]
                     if i+1 < 7:
                         self.science_queue = np.append(self.science_queue, i+1)
                     #print(f"skipped {i},\n orbit is {self.orbit_adcs} and angle is {self.adcs.get_yaw()}")
                 elif self.orbit_adcs > i:
+                    self.prefix = "image"
                     self.state = "science" 
                     self.science_queue = self.science_queue[self.science_queue != i]
                     print(f"execute {i}")
@@ -75,8 +76,9 @@ class Cubesat:
             
             #orbit 5-7: 5 photos max x 2 sec per photo max margin
             if self.state != "science":
+                print(self.retake_queue)
                 for i in self.retake_queue:
-                    if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
+                    if self.orbit_adcs - i > 10/360: #too late/rotated too much, postpone to next orbit
                         self.retake_queue = self.retake_queue[self.retake_queue != i]
                         if i+1 < 7:
                             self.retake_queue = np.append(self.retake_queue, i+1)
@@ -133,24 +135,24 @@ class Cubesat:
         
         #add to self.image_queue depending on quality of image
         if sector != -1:
+            print("found hab")
             if self.orbit_adcs > 2: #don't add initial images
                 self.image_queue.append(name)
             if self.orbit_adcs < 5:
                 cur_orbit = np.floor(self.orbit_adcs)
                 next = cur_orbit + 2 + hab_angle/360
-                print(next)
                 self.add_angle(next)
         self.state = "nominal"
     
     def add_angle(self, angle):
         angle_frac = np.mod(angle, 1)
-        print(angle_frac)
         for i in self.retake_queue: #there's probably some way to vectorize this
             i_frac = np.mod(i, 1)
             diff = angle_frac - i_frac
             if abs(diff) < (10/360) or abs(diff + 1) < (10/360) or abs(diff - 1) < (10/360):
+                print("no")
                 return False
-        self.retake_queue.append(angle)
+        self.retake_queue = np.append(self.retake_queue, angle)
         return True
 
     def comms(self): 
@@ -162,11 +164,15 @@ class Cubesat:
 
         #send images
         if self.image_comms:
+            self.connection.write_raw("connect")
+            self.connection.connect_as_host(3)
             for image in self.image_queue:
                 self.connection.write_raw("again")
                 self.send_image(image)           
             self.image_queue = []
             self.image_comms = False
+        else:
+            self.connection.write_raw("no")
         self.connection.write_raw("done")        
         self.connection.close_all_connections()
         self.state = "nominal"
