@@ -30,7 +30,7 @@ class Cubesat:
         # #revised angle order: 0-60-120-180-240-300-30-90-150-210-270-330
         # #big leap from 300 to 30 degrees 
 
-        self.retake_queue = []
+        self.retake_queue = np.array([])
         self.image_queue = []
         self.image_comms = False
         #orbit constants
