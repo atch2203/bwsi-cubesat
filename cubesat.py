@@ -35,7 +35,7 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 60 #seconds per orbit
+        self.time_scale = 10 #seconds per orbit
         self.cycle = 0.5 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -93,7 +93,7 @@ class Cubesat:
             #telemetry packet
             if self.orbit_adcs > self.comms_pass and self.state != "science":
                 self.state = "comms" 
-                self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
+                self.comms_pass = self.comms_pass + 1.07
 
             #orbit 8-10: transmit 5 images and text file
             elif self.orbit_adcs > 7 and self.state != "science":
@@ -162,7 +162,7 @@ class Cubesat:
     def find_index(self, angle, arr):
         for i in arr:
             if self.close_angles(angle, i):
-                return np.where(arr == i)[0]
+                return np.where(arr == i)[0][0]
         return -1
 
     def close_angles(self, a1, a2):
@@ -238,7 +238,8 @@ class Cubesat:
         #formulate packet
         t = time.localtime()
         send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit_adcs}\nangle: {self.adcs.get_yaw()}\n"
-        f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}")
+        f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}"
+        f"\nretake_queue {self.retake_queue}")
         
         self.connection.write_string(send_data)
         #receive updates
