@@ -10,6 +10,8 @@ import numpy as np
 
 class Cubesat:
     def __init__(self, otherpi):
+        img.set_user_values("alex", 0.37938867461135106, 271, 31)
+
         self.otherpi = otherpi
         self.adcs = ADCS()
         self.state = "commission"
@@ -28,11 +30,11 @@ class Cubesat:
         # #revised angle order: 0-60-120-180-240-300-30-90-150-210-270-330
         # #big leap from 300 to 30 degrees 
 
-        self.process_queue = []
+        self.retake_queue = []
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 20 #seconds per orbit
+        self.time_scale = 60 #seconds per orbit
         self.cycle = 0.5 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -59,17 +61,31 @@ class Cubesat:
             time.sleep(self.cycle)
 
             #orbit 1-4: 12 total photos x 2 sec per photo (max margin) to process
-            #orbit 5-7: 5 photos max x 2 sec per photo max margin
             for i in self.science_queue:
                 if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
                     self.science_queue = self.science_queue[self.science_queue != i]
-                    self.science_queue = np.append(self.science_queue, i+1)
+                    if i+1 < 7:
+                        self.science_queue = np.append(self.science_queue, i+1)
                     #print(f"skipped {i},\n orbit is {self.orbit_adcs} and angle is {self.adcs.get_yaw()}")
                 elif self.orbit_adcs > i:
                     self.state = "science" 
                     self.science_queue = self.science_queue[self.science_queue != i]
                     print(f"execute {i}")
                     break
+            
+            #orbit 5-7: 5 photos max x 2 sec per photo max margin
+            if self.state != "science":
+                for i in self.retake_queue:
+                    if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
+                        self.retake_queue = self.retake_queue[self.retake_queue != i]
+                        if i+1 < 7:
+                            self.retake_queue = np.append(self.retake_queue, i+1)
+                        #print(f"skipped {i},\n orbit is {self.orbit_adcs} and angle is {self.adcs.get_yaw()}")
+                    elif self.orbit_adcs > i:
+                        self.state = "science" 
+                        self.retake_queue = self.retake_queue[self.retake_queue != i]
+                        print(f"execute {i}")
+                        break
 
             #telemetry packet
             if self.orbit_adcs > self.comms_pass and self.state != "science":
@@ -92,18 +108,22 @@ class Cubesat:
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw())#TODO change constants
-        hab_angle, dist, sector = -1, -1, -1
+        area, x, y, hab_angle, dist, sector = -1, 0, 0, -1, -1, -1
         if len(habs) > 0:
             hab_angle = habs[0].central_angle #find this from processing
             dist = habs[0].distance
             sector = habs[0].sector
+            x = habs[0].x
+            y = habs[0].y
+            area = habs[0].area
+
 
         #formulate data
         t = time.localtime()
-        hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}" if sector != -1 else "\nno hab found"
+        hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}\nx:{x}\ny:{y}\narea:{area}" if sector != -1 else "\nno hab found"
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}"
-        f"{hab_data}")
+        f"{hab_data}\n\n")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
@@ -111,13 +131,18 @@ class Cubesat:
         
         #add to self.image_queue depending on quality of image
         if sector != -1:
-            self.image_queue.append(name)
+            if self.orbit_adcs > 2: #don't add initial images
+                self.image_queue.append(name)
+            if self.orbit_adcs < 5:
+                cur_orbit = np.floor(orbit_adcs)
+                self.add_angle(cur_orbit + 2 + hab_angle/360)
         self.state = "nominal"
     
     def add_angle(self, angle):
-        for i in self.science_queue: #there's probably some way to vectorize this
+        for i in self.retake_queue: #there's probably some way to vectorize this
             if abs(np.floor(angle) - np.floor(i)) < 10 / 360:
                 return False
+        self.retake_queue.append(angle)
         return True
 
     def comms(self): 
