@@ -30,12 +30,11 @@ class Ground:
             elif type == "done":
                 break
 
-            connect = self.connection.receive_raw()
-            if connect == "connect":
-                self.connection.connect_repeat_again_as_client(1, 10)
             #check to go again
             again = self.connection.receive_raw()
-            if again != "again":
+            if again == "connect":
+                self.connection.connect_repeat_again_as_client(1, 10)
+            elif again != "again":
                 self.connection.close_all_connections()
                 break
         #pull for updates
@@ -43,7 +42,7 @@ class Ground:
         if self.push:
             git_push.pull()
             self.push = False
-            self.push_image_thread = threading.Thread(target=git_push.commit_and_push, args=("add images"))
+            self.push_image_thread = threading.Thread(target=git_push.commit_and_push, args=("add images",))
             self.push_image_thread.start()
         #parse update.txt
         #with open("/home/pi/CHARMS/update.txt", "r") as f:
