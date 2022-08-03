@@ -10,6 +10,8 @@ import numpy as np
 
 class Cubesat:
     def __init__(self, otherpi):
+        img.set_user_values("alex", 0.37938867461135106, 271, 31)
+
         self.otherpi = otherpi
         self.adcs = ADCS()
         self.state = "commission"
