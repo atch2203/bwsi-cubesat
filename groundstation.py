@@ -36,23 +36,23 @@ class Ground:
                 self.connection.close_all_connections()
                 break
         #pull for updates
-        git_push.pull()
         #push images
         if self.push:
+            git_push.pull()
             self.push = False
             self.push_image_thread = threading.Thread(target=git_push.commit_and_push, args=("add images"))
             self.push_image_thread.start()
         #parse update.txt
-        with open("/home/pi/CHARMS/update.txt", "r") as f:
-            self.update_data = f.readlines()
+        #with open("/home/pi/CHARMS/update.txt", "r") as f:
+        #    self.update_data = f.readlines()
         #change update.txt to no to not repeat update
-        if self.update_data[0] == "yes":
-            self.send = True
-            self.update_data[0] = "no"
-            with open("/home/pi/CHARMS/update.txt", "w") as f:
-                f.writelines(self.update_data)
-            self.push_update_thread = threading.Thread(target=git_push.commit_and_push, args=("read update.txt"))
-            self.push_update_thread.start()
+        #if self.update_data[0] == "yes":
+        #    self.send = True
+        #    self.update_data[0] = "no"
+        #    with open("/home/pi/CHARMS/update.txt", "w") as f:
+        #        f.writelines(self.update_data)
+        #    self.push_update_thread = threading.Thread(target=git_push.commit_and_push, args=("read update.txt"))
+        #    self.push_update_thread.start()
 
     def commission(self):
         self.connection = stationinit.bt_groundtest(self.otherpi, "True")
@@ -71,14 +71,14 @@ class Ground:
         #receive telemetry
         print(f"{self.connection.receive_string()}")
         #send updates
-        self.connection.connect_repeat_again_as_client(2, 3)
-        if self.send:
-            self.connection.write_raw("update")
-            for l in self.update_data[1:]:
-                self.connection.write_raw(l)
-            self.connection.write_raw("done") 
-        else:
-            self.connection.write_raw("no_update")
+        #self.connection.connect_repeat_again_as_client(2, 3)
+        #if self.send:
+        #    self.connection.write_raw("update")
+        #    for l in self.update_data[1:]:
+        #        self.connection.write_raw(l)
+        #    self.connection.write_raw("done") 
+        #else:
+        #    self.connection.write_raw("no_update")
                     
     def image(self):
         self.push = True
