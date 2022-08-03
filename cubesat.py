@@ -75,6 +75,7 @@ class Cubesat:
             
             #orbit 5-7: 5 photos max x 2 sec per photo max margin
             if self.state != "science":
+                print(self.retake_queue)
                 for i in self.retake_queue:
                     if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
                         self.retake_queue = self.retake_queue[self.retake_queue != i]
@@ -134,13 +135,19 @@ class Cubesat:
             if self.orbit_adcs > 2: #don't add initial images
                 self.image_queue.append(name)
             if self.orbit_adcs < 5:
-                cur_orbit = np.floor(orbit_adcs)
-                self.add_angle(cur_orbit + 2 + hab_angle/360)
+                cur_orbit = np.floor(self.orbit_adcs)
+                next = cur_orbit + 2 + hab_angle/360
+                print(next)
+                self.add_angle(next)
         self.state = "nominal"
     
     def add_angle(self, angle):
+        angle_frac = np.mod(angle, 1)
+        print(angle_frac)
         for i in self.retake_queue: #there's probably some way to vectorize this
-            if abs(np.floor(angle) - np.floor(i)) < 10 / 360:
+            i_frac = np.mod(i, 1)
+            diff = angle_frac - i_frac
+            if abs(diff) < (10/360) or abs(diff + 1) < (10/360) or abs(diff - 1) < (10/360):
                 return False
         self.retake_queue.append(angle)
         return True
@@ -175,7 +182,7 @@ class Cubesat:
         print("connected and waiting for ready")
         self.connection.receive_raw()
         print("ready received")
-        self.adcs.initial_angle(False)
+        self.adcs.initial_angle(True)
         self.connection.write_raw("got_ready")
         self.connection.receive_raw()
         print("start received")
