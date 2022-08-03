@@ -1,5 +1,5 @@
 import time
-from time import strftime
+# from time import strftime
 from picamera import PiCamera
 import numpy as np
 import cv2
@@ -10,27 +10,35 @@ camera = PiCamera()
 camera.resolution = (750,670)
 time.sleep(2)
 
-#this entire thing only saves 1 image for now. 
-#supposed to be called for each pahse 1 capture
-
-
 # path = "home/pi/CHARMS/Imaging/test_images/"
 
 '''
-DEPENDANTS:
+CONSTANTS:
 '''
-path = "test_images/"
-user = "rhea" #replace with your name
-real2Img = 100/258.49564793241683 # 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up
-E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
-centerOff = 45 
+dir_path = "test_images/" #TODO need to figure this out
 
+
+'''
+CALL THE SET USER VALUES FUNCTOIN TO SET THESE
+'''
+user = "" 
+real2Img = 1  # mm/pixle - subject to change - depending on each person's set-up
+E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
+centerOff = 1 #subject to change - depending on each person's set-up
+
+
+'''
+call the set imu angle function to change this
+'''
+imu_angle = 0 #TODO get this info
 # real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
 # E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
 # centerOff = 27  
-imu_angle = 0 #TODO get this info
 
-HAB_list = []
+
+HAB_list = [] #stores all detected HABs (including duplicates)
+
+cleaned_HABs = [] #stores all unique HABs
 
 class HAB:
     def __init__(self):
@@ -40,29 +48,38 @@ class HAB:
         self.central_angle = 0
         self.distance = 0
         self.sector = 0
+        self.path = ""
     def __str__(self):
         return str(self.x) + " " + str(self.y) + " \n"
+    def __eq__(self, other):
+        # if not isinstance(other, HAB):
+        #     return NotImplemented
+        return self.x == other.x and self.y == other.y and self.path == other.path
     
 
-
-def capture_image(imu_angle):
+'''
+captures an image, stores in global path by timestamp
+Returns path to file as string 
+'''
+def capture_image():
     #capture image
-    fileName = user + ".jpg"
-    # fileName = strftime("%X%x_" + user + ".jpg") #locale date_locale time_time zone
-    camera.capture(path + fileName)
+    timestr = time.strftime("%Y-%m-%d_%H-%M-%S")
+    fileName = user + "_" + timestr + ".jpg"
+    camera.capture(dir_path + fileName)
     # return image
-    return path + fileName
+    return dir_path + fileName
 
 
-
-
-
-#TODO rhea: fix this part with the constants
-def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
+'''
+finds HAB location supplied img path, imu_angle, (and the global vars)
+saves hab object(s) into HAB_list
+returns a temporary list of just the new HABs from this image 
+'''
+def find_HABs(img, imu_angle):
     #constants
-    real2Image_coef = real2Img  #= 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
-    eCenter2PicCenter = E2PicCenter #= 271 #mm - subject to change - depending on each person's set-up
-    center_offset = centerOff #27 #pixels - subject to change - depending on each person's set-up
+    real2Image_coef = real2Img  
+    eCenter2PicCenter = E2PicCenter 
+    center_offset = centerOff 
     
     image = cv2.imread(img)
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -70,23 +87,26 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     up_bound = np.array ([179, 255, 255])
     mask = cv2.inRange(hsv_img, low_bound, up_bound)
 
-    cv2.imshow("mask", mask)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    #uncomment this if you think something messed up
+    #and you want to see how the mask looks
+
+    # cv2.imshow("mask", mask) #comment out after integration
+    # cv2.waitKey() #comment out after integration
+    # cv2.destroyAllWindows() #comment out after integration
 
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
 
     threshold = 1000
-    red = 0
+    #red = 0 #unnecessary?
     ret_habs = []
     
     for c in cnts:
         area = cv2.contourArea(c)
-        red+=area
+        #red+=area #unnecessary?
         if(area<threshold):
             continue
-        cv2.drawContours(image,[c],-1,(0,255,0),3)
+        cv2.drawContours(image,[c],-1,(0,255,0),3) #can comment out after completing integration
         M =  cv2.moments(c)
         if M["m00"] == 0:
             cX=0
@@ -96,8 +116,8 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
             cY = int(M["m01"] / M["m00"])
             
         #drawing 
-        cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1)
-        cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2)
+        # cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
+        # cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
         # cv2.imshow('Red Mask', red_mask)
         
         # cv2.waitKey()
@@ -125,11 +145,12 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
 
         temp_hab = HAB()
         temp_hab.distance = AC
-        temp_hab.area = area * real2Image_coef * 282/2392.5 #real2Image is mm not mm^2
+        temp_hab.area = area * 282/2392.5 #real2Image is mm not mm^2, this is mm^2/pixel
         temp_hab.central_angle = fin_angle = imu_angle + math.degrees(angleBAC)
         temp_hab.x  = h_x = find_x(fin_angle, AC)
         temp_hab.y  = h_y = find_y(fin_angle, AC)
         temp_hab.sector = find_sector(h_x, h_y)
+        temp_hab.path = img
 
         ret_habs.append(temp_hab)
 
@@ -143,8 +164,6 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
         # print("offset angle:", math.degrees(angleBAC), "degree")
         # print("x:",cX,"y:",cY,"area:",area,"hab2edge,mm:",BC,"hab2center,mm:",OC)
         # print("distance from hab centroid to earth center:", AC, "mm")
-        # return math.degrees(angleBAC)
-        #return math.degress(angleBAC),d= AC, hab_area
 
     # print("OA aka eCenter2PicCenter: 266 mm")
     # print("edge2center:", OB, "mm")
@@ -152,10 +171,13 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     return ret_habs
 
 
+'''
+given x and y values in inches, determine sector
+coordinte plane is scaled x: [0, 34], y: [0, 33]
+with (0,0) inches at the top left of sector 1
 
-
-
-
+returns sector num 1-6 
+'''
 def find_sector(h_x, h_y):
     
     
@@ -178,12 +200,69 @@ def find_sector(h_x, h_y):
         else:
             sector = 6
 
-    #can change this based on what return type needed
+    
     # return ("Sector: " + str(sector)) 
     return sector
 
+'''
+This function makes a COPY of the HAB_list and returns
+a new list with the duplicates and near duplicates removed
+based on a margin. 
+It also sets the list global var cleaned_HABs for easier
+access as needed.
+
+should handle all HAB_list with lengths 0+
+'''
+
+def remove_doubles():
+    in_margin = 1 #sets margin at +-1 inch in all directions from centroid
+    new_list = HAB_list[:]
+
+    #handling case of 0 or 1 HABs (nothing to remove)
+    if (len(HAB_list)<=1):
+        return new_list
+
+
+    list_len = len(new_list)
+    i = 0
+    j = 0
+
+    while i<list_len:
+        og_hab = new_list[i]
+        
+        while j<list_len:
+            new_hab = new_list[j]
+            
+            if(og_hab == new_hab):
+                j+=1
+            
+            else:
+                if(is_within(og_hab.x, og_hab.y, new_hab.x, new_hab.y,in_margin)):
+                    new_list.remove(new_hab)
+                    # i-=1 #resets the indexes accounting for removed
+                    j-=1
+                    list_len-=1
+                
+                #move forward
+                j+=1
+        
+        i+=1
+
+    global cleaned_HABs
+    cleaned_HABs = new_list[:]
+
+    return new_list
+
 
 #helper methods
+
+
+def is_within(x_o, y_o,x_n, y_n, margin):
+    if(abs(x_n-x_o)<margin and abs(y_n-y_o)<margin):
+        return True
+    return False
+
+
 def find_x(deg, inch):
     theta = deg * math.pi / 180
     d = mm_to_in(inch)
@@ -210,17 +289,93 @@ def cosLawAngle(a, b, c):
 def cosLawSide(angle, b, c):
     return math.sqrt(b**2 + c**2 - 2.0*b*c*math.cos(angle)) 
 
+'''
+This can be called to set the global variables specific to the user
+so it only needs to be called once. These values depend on what you
+recorded/used in the imaging calibration (see Stephen's instructions)
+
+username = your first name as a string to set img names
+r2I = mm/pixel ratio
+E2PC = 'earth' to pic center 
+(should be around 271 for everyone since same set up)
+cenOff = the value you adjusted to move the center line as needed
 
 
+eg. set_user_values("rhea", 100/258.49564793241683, 271, 45)
+eg. set_user_values("stephen", 0.3744906844618852, 271, 27)
 
-if __name__ == "__main__":
-    real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
-    E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
-    centerOff = 27  
-    imu_angle = 0
+'''
+def set_user_values(username, r2I, E2PC, cenOff):
+    global user, real2Img, E2PicCenter, centerOff
+    user = username #this should your first name to set img names
+    real2Img = r2I
+    E2PicCenter = E2PC
+    centerOff = cenOff
+
+#need to actually test this
+#Angle order: 0-60-120-180-240-300-30-90-150-210-270-330
+def flight_test():
+    num_photos  = 0
+    deg_est = 0
+    zzz = 60 / 6
+    #orbit 1
+    orbit_end_deg = 300
+
+    while (orbit_end_deg<=330):
+        while (deg_est<=orbit_end_deg):
+                
+            find_HABs(capture_image(), deg_est)
+            num_photos += 1
+            print(str(num_photos) + "\tdegree: " + str(deg_est) + "\ttime: "+ time.strftime("%H:%M:%S"))
+            deg_est+=60 
+            time.sleep(zzz-1)
+        #it will be at 360=0, so need to take an extra 30/6 = 5 sec
+        time.sleep(30/6)
+        orbit_end_deg+=30 #orbit 2 300+30=330
+        deg_est = deg_est%360 + 30
     
-    find_HABs("test_images/light3.jpg", imu_angle, real2Img, E2PicCenter, centerOff)
+    #test cleaning
+    print("done with 2 orbits, checking HAB list")
+    print(*HAB_list)
+    print("\nafter removal: ")
+    print(*remove_doubles())
+    return num_photos
 
+
+
+
+
+
+
+
+'''
+you can use this to set the current imu reading instead of 
+changing the global var. we're using angle on a 0 to 360 scale.
+this should probably be called each time you capture an image.
+'''
+def set_pic_angle(angle):
+    global imu_angle
+    imu_angle = angle
+
+if __name__ == "__main__":    
     
-    # find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
+    #THIS LINE SHOULD CHANGE PER PERSON
+    set_user_values("rhea", 100/258.49564793241683, 271, 45)
+    
+    
+    input('Press enter to start imaging: ')
+    print("started")
+    n = flight_test()
+    print("done imaging, photos total taken: " + str(n))
+
+
+    #testing the remove doubles method
+    # find_HABs(capture_image(), imu_angle)
+    # find_HABs(capture_image(), imu_angle)
+    # print("before removal: ")
+    # print(*HAB_list)
+    # print("\nafter removal: ")
+    # print(*remove_doubles())
+    # print("\nold list:")
+    # print(*HAB_list)
 
