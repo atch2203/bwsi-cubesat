@@ -1,4 +1,5 @@
 from time import sleep
+import imaging_stage_one as phase1
 
 #take pic + process --> 2 seconds
 #sleep time --> 8 seconds
@@ -8,8 +9,14 @@ from time import sleep
 time = 0
 zzz = 4
 sleep(2) #idle --> focus camera
-input('Press enter to continue: ')
+input('Press enter to start imaging: ')
 print("started")
+
+
+
+
+
+
 
 for pic in range(0,4,1):
     #take pic 
