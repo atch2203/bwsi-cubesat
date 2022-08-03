@@ -78,15 +78,15 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     cnts = imutils.grab_contours(cnts)
 
     threshold = 1000
-    red = 0
+    #red = 0 #unnecessary?
     ret_habs = []
     
     for c in cnts:
         area = cv2.contourArea(c)
-        red+=area
+        #red+=area #unnecessary?
         if(area<threshold):
             continue
-        cv2.drawContours(image,[c],-1,(0,255,0),3)
+        cv2.drawContours(image,[c],-1,(0,255,0),3) #can comment out after completing integration
         M =  cv2.moments(c)
         if M["m00"] == 0:
             cX=0
@@ -96,8 +96,8 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
             cY = int(M["m01"] / M["m00"])
             
         #drawing 
-        cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1)
-        cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2)
+        cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
+        cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
         # cv2.imshow('Red Mask', red_mask)
         
         # cv2.waitKey()
@@ -143,8 +143,6 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
         # print("offset angle:", math.degrees(angleBAC), "degree")
         # print("x:",cX,"y:",cY,"area:",area,"hab2edge,mm:",BC,"hab2center,mm:",OC)
         # print("distance from hab centroid to earth center:", AC, "mm")
-        # return math.degrees(angleBAC)
-        #return math.degress(angleBAC),d= AC, hab_area
 
     # print("OA aka eCenter2PicCenter: 266 mm")
     # print("edge2center:", OB, "mm")
