@@ -96,7 +96,7 @@ class Cubesat:
                 self.comms_pass = self.comms_pass + 1.07
 
             #orbit 8-10: transmit 5 images and text file
-            elif self.orbit_adcs > 7 and self.state != "science":
+            elif self.orbit_adcs > 7 and self.state != "science" and len(self.image_queue) > 0:
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
@@ -106,7 +106,7 @@ class Cubesat:
         
         name = f"{self.prefix}_{self.cur_image}"
         if self.prefix == "retake":
-            name = f"{self.prefix}_{self.find_index(self.adcs.get_yaw()/360, self.angle_index)}_{np.floor(self.orbit_adcs)}"
+            name = f"{self.prefix}_{self.find_index(self.adcs.get_yaw()/360, self.angle_index, 20)}_{np.floor(self.orbit_adcs)}"
         else:
             self.cur_image = self.cur_image + 1
        
@@ -142,7 +142,7 @@ class Cubesat:
             if self.prefix == "retake": #don't add initial images
                 self.image_queue.append(name)
             else:
-                if self.find_index(np.mod(self.orbit_adcs, 1), self.angle_index) == -1:
+                if self.find_index(np.mod(self.orbit_adcs, 1), self.angle_index, 10) == -1:
                     self.angle_index = np.append(self.angle_index, np.mod(self.orbit_adcs, 1))
 
             if self.orbit_adcs < 5:
@@ -153,23 +153,23 @@ class Cubesat:
         self.state = "nominal"
     
     def add_angle(self, angle):
-        if self.find_index(angle, self.retake_queue) != -1:
+        if self.find_index(angle, self.retake_queue, 10) != -1:
             print("no")
             return False
         self.retake_queue = np.append(self.retake_queue, angle)
         return True
 
-    def find_index(self, angle, arr):
+    def find_index(self, angle, arr, bound):
         for i in arr:
-            if self.close_angles(angle, i):
-                return np.where(arr == i)[0][0]
+            if self.close_angles(angle, i, bound):
+                return np.where(abs(arr - i) < 0.0001)[0][0]
         return -1
 
-    def close_angles(self, a1, a2):
+    def close_angles(self, a1, a2, bound):
         a1_frac = np.mod(a1, 1)
         a2_frac = np.mod(a2, 1)
         diff = a1_frac - a2_frac
-        return abs(diff) < (10/360) or abs(diff + 1) < (10/360) or abs(diff - 1) < (10/360)
+        return abs(diff) < bound/360 or abs(diff + 1) < bound/360 or abs(diff - 1) < bound/360 
         
 
     def comms(self): 
@@ -178,14 +178,16 @@ class Cubesat:
         #send packet
         self.connection.connect_repeat_again_as_client(1, 3)
         self.send_telemetry() 
+        print(self.image_queue)
 
         #send images
         if self.image_comms:
+            print("sending images")
             self.connection.write_raw("connect")
             self.connection.connect_as_host(1)
             for image in self.image_queue:
-                self.connection.write_raw("again")
                 self.send_image(image)           
+                self.connection.write_raw("again")
             self.image_queue = []
             self.image_comms = False
         else:
@@ -239,7 +241,7 @@ class Cubesat:
         t = time.localtime()
         send_data = (f"{time.strftime('%H:%M:%S', t)}\norbit: {self.orbit_adcs}\nangle: {self.adcs.get_yaw()}\n"
         f"{subprocess.check_output(['vcgencmd', 'measure_temp']).decode('UTF-8')}"
-        f"\nretake_queue {self.retake_queue}")
+        f"retake_queue {self.retake_queue}\n")
         
         self.connection.write_string(send_data)
         #receive updates
