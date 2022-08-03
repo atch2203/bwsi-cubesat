@@ -332,6 +332,7 @@ def flight_test():
         #it will be at 360=0, so need to take an extra 30/6 = 5 sec
         time.sleep(30/6)
         orbit_end_deg+=30 #orbit 2 300+30=330
+        deg_est = deg_est%360 + 30
     
     #test cleaning
     print("done with 2 orbits, checking HAB list")
