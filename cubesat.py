@@ -33,7 +33,7 @@ class Cubesat:
         self.image_comms = False
         #orbit constants
         self.time_scale = 20 #seconds per orbit
-        self.cycle = 1 #wait time per nominal cycle
+        self.cycle = 0.5 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
 
@@ -64,7 +64,7 @@ class Cubesat:
                 if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
                     self.science_queue = self.science_queue[self.science_queue != i]
                     self.science_queue = np.append(self.science_queue, i+1)
-                    print(f"skipped {i}")
+                    #print(f"skipped {i},\n orbit is {self.orbit_adcs} and angle is {self.adcs.get_yaw()}")
                 elif self.orbit_adcs > i:
                     self.state = "science" 
                     self.science_queue = self.science_queue[self.science_queue != i]
@@ -224,9 +224,9 @@ class Cubesat:
             self.orbit = (time.time() - self.start_time) / self.time_scale 
             orbit_adcs = self.adcs.get_yaw()
             #correct for imprecision in orbit
-            if np.mod(self.orbit, 1) > 0.3 and orbit_adcs < 100:
+            if np.mod(self.orbit, 1) > 0.2 and orbit_adcs < 60:
                 orbit_adcs = orbit_adcs + 360
-            elif np.mod(self.orbit, 1) < 0.7 and orbit_adcs > 260:
+            elif np.mod(self.orbit, 1) < 0.8 and orbit_adcs > 300:
                 orbit_adcs = orbit_adcs - 360
             self.orbit_adcs = np.floor(self.orbit) + orbit_adcs / 360
         
