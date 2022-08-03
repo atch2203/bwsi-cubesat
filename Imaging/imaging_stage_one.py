@@ -56,7 +56,7 @@ class HAB:
         #     return NotImplemented
         return self.x == other.x and self.y == other.y and self.path == other.path
     def summary(self):
-        return ("\n-------\nNEW HAB: " + self.path + "\nCENTRAL ANGLE: " + str(self.central_angle) + "\nCOORDINATE: " + str(self) + "\nSECTOR: " + str(self.sector) + "\nAREA: " + str(self.area) + "\nDISTANCE TO CUBESAT: " + str(self.distance))
+        return ("\n-------\nNEW HAB: " + self.path + "\nCENTRAL ANGLE: " + str(self.central_angle) + "\nCOORDINATE: " + str(self) + "\nSECTOR: " + str(self.sector) + "\nAREA: " + str(self.area) + "\nDISTANCE TO BOARD CENTER: " + str(self.distance))
     
 
 '''
@@ -118,8 +118,11 @@ def find_HABs(img, imu_angle):
             cY = int(M["m01"] / M["m00"])
             
         #drawing 
-        # cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
-        # cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
+        cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
+        cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
+        cv2.imwrite(img[:-4] + "_mask.jpg", image)
+        
+        
         # cv2.imshow('Red Mask', red_mask)
         
         # cv2.waitKey()
@@ -148,7 +151,7 @@ def find_HABs(img, imu_angle):
         temp_hab = HAB()
         temp_hab.distance = AC
         temp_hab.area = area * 282/2392.5 #real2Image is mm not mm^2, this is mm^2/pixel
-        temp_hab.central_angle = fin_angle = imu_angle + math.degrees(angleBAC)
+        temp_hab.central_angle = fin_angle = (imu_angle + math.degrees(angleBAC)) % 360
         temp_hab.x  = h_x = find_x(fin_angle, AC)
         temp_hab.y  = h_y = find_y(fin_angle, AC)
         temp_hab.sector = find_sector(h_x, h_y)
@@ -375,7 +378,7 @@ if __name__ == "__main__":
     n = flight_test()
     print("done imaging, photos total taken: " + str(n))
     print("making text file")
-    list_to_txt(cleaned_HABs, "summary.txt")
+    list_to_txt(cleaned_HABs, user + "_summary.txt")
     print("finished all processes")
 
     #testing the remove doubles method
