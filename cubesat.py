@@ -102,16 +102,18 @@ class Cubesat:
 
         #formulate data
         t = time.localtime()
+        hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}" if sector != -1 else "\nno hab found"
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}"
-        f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}" if sector != -1 else "\nno hab found")
+        hab_data)
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
             f.write(data)
         
         #add to self.image_queue depending on quality of image
-        self.image_queue.append(name)
+        if sector != -1:
+            self.image_queue.append(name)
         self.state = "nominal"
     
     def add_angle(self, angle):
