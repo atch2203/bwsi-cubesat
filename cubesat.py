@@ -31,6 +31,7 @@ class Cubesat:
         # #big leap from 300 to 30 degrees 
 
         self.retake_queue = np.array([])
+        self.angle_index = np.array([])
         self.image_queue = []
         self.image_comms = False
         #orbit constants
@@ -104,7 +105,10 @@ class Cubesat:
         print(f"science {self.orbit_adcs}")
         
         name = f"{self.prefix}_{self.cur_image}"
-        self.cur_image = self.cur_image + 1
+        if self.prefix == "retake":
+            name = f"{self.prefix}_{self.find_index(self.adcs.get_yaw()/360, self.angle_index)}_{np.floor(self.orbit_adcs)}"
+        else:
+            self.cur_image = self.cur_image + 1
        
         print(f"image at angle {self.adcs.get_yaw()}")
         #take image and process it
@@ -137,22 +141,36 @@ class Cubesat:
             print("found hab")
             if self.prefix == "retake": #don't add initial images
                 self.image_queue.append(name)
+            else:
+                if self.find_index(np.mod(self.orbit_adcs, 1), self.angle_index) == -1:
+                    self.angle_index = np.append(self.angle_index, np.mod(self.orbit_adcs, 1))
+
             if self.orbit_adcs < 5:
                 cur_orbit = np.floor(self.orbit_adcs)
                 next = cur_orbit + 2 + hab_angle/360
                 self.add_angle(next)
+
         self.state = "nominal"
     
     def add_angle(self, angle):
-        angle_frac = np.mod(angle, 1)
-        for i in self.retake_queue: #there's probably some way to vectorize this
-            i_frac = np.mod(i, 1)
-            diff = angle_frac - i_frac
-            if abs(diff) < (10/360) or abs(diff + 1) < (10/360) or abs(diff - 1) < (10/360):
-                print("no")
-                return False
+        if self.find_index(angle, self.retake_queue) != -1:
+            print("no")
+            return False
         self.retake_queue = np.append(self.retake_queue, angle)
         return True
+
+    def find_index(self, angle, arr):
+        for i in arr:
+            if self.close_angles(angle, i):
+                return np.where(arr == i)[0]
+        return -1
+
+    def close_angles(self, a1, a2):
+        a1_frac = np.mod(a1, 1)
+        a2_frac = np.mod(a2, 1)
+        diff = a1_frac - a2_frac
+        return abs(diff) < (10/360) or abs(diff + 1) < (10/360) or abs(diff - 1) < (10/360)
+        
 
     def comms(self): 
         print(f"comms {self.orbit_adcs}")
@@ -164,7 +182,7 @@ class Cubesat:
         #send images
         if self.image_comms:
             self.connection.write_raw("connect")
-            self.connection.connect_as_host(3)
+            self.connection.connect_as_host(1)
             for image in self.image_queue:
                 self.connection.write_raw("again")
                 self.send_image(image)           
@@ -269,8 +287,8 @@ class Cubesat:
             self.orbit_adcs = np.floor(self.orbit) + orbit_adcs / 360
         
 if __name__ == "__main__":
-    otherpi = sys.argv[1]#name of other pi hostname
-    realRun = sys.argv[2]#whether this is the 1st/2nd time run in startup.sh
+    otherpi = sys.argv[1]
+    realRun = sys.argv[2]
     cubesat = Cubesat(otherpi)
     if realRun == "True":
         cubesat.main(otherpi)

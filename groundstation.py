@@ -32,7 +32,7 @@ class Ground:
 
             connect = self.connection.receive_raw()
             if connect == "connect":
-                self.connection.connect_repeat_again_as_client(3, 5)
+                self.connection.connect_repeat_again_as_client(1, 5)
             #check to go again
             again = self.connection.receive_raw()
             if again != "again":
