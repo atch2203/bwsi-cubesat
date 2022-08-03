@@ -79,6 +79,7 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
 
     threshold = 1000
     red = 0
+    ret_habs = []
     
     for c in cnts:
         area = cv2.contourArea(c)
@@ -124,11 +125,13 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
 
         temp_hab = HAB()
         temp_hab.distance = AC
-        temp_hab.area = area * real2Image_coef * 282/2392.5 #real2Image is mm not mm^2
+        temp_hab.area = area * 282/2392.5 #real2Image is mm not mm^2, this is mm^2/pixel
         temp_hab.central_angle = fin_angle = imu_angle + math.degrees(angleBAC)
         temp_hab.x  = h_x = find_x(fin_angle, AC)
         temp_hab.y  = h_y = find_y(fin_angle, AC)
         temp_hab.sector = find_sector(h_x, h_y)
+
+        ret_habs.append(temp_hab)
 
         HAB_list.append(temp_hab)
 
@@ -146,7 +149,8 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     # print("OA aka eCenter2PicCenter: 266 mm")
     # print("edge2center:", OB, "mm")
     # print("eCenter2Edge:", AB, "mm")
-    print(*HAB_list)
+    return ret_habs
+
 
 
 

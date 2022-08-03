@@ -18,12 +18,12 @@ class Cubesat:
         self.comms_pass = 0
         self.prefix = "image"
         #queues for sending
-        self.science_queue = np.array([1, 1.25, 1.5, 1.75, 2, 2.35, 2.65, 2.9, 20]) #leave the 20 in there
+        self.science_queue = np.array([720+22, 360+53, 90, 360+112, 143, 360+180, 202, 360+233, 270, 360+292, 323, 360+360]) / 360
         self.process_queue = []
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 10 #seconds per orbit
+        self.time_scale = 60 #seconds per orbit
         self.cycle = 1 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -49,19 +49,26 @@ class Cubesat:
             #print("nominal")
             time.sleep(self.cycle)
 
-            #orbit 1=4: 12 total photos x 2 sec per photo (max margin) to process
-            #orbit 5-6: 5 photos max x 2 sec per photo max margin
-            if self.orbit_adcs > self.science_queue[0]:
-                self.state = "science" 
-                self.science_queue = self.science_queue[1:]
+            #orbit 1-4: 12 total photos x 2 sec per photo (max margin) to process
+            #orbit 5-7: 5 photos max x 2 sec per photo max margin
+            for i in self.science_queue:
+                if self.orbit_adcs - i > 0.2: #too late/rotated too much, postpone to next orbit
+                    self.science_queue = self.science_queue[self.science_queue != i]
+                    self.science_queue = np.append(self.science_queue, i+1)
+                    print(f"skipped {i}")
+                elif self.orbit_adcs > i:
+                    self.state = "science" 
+                    self.science_queue = self.science_queue[self.science_queue != i]
+                    print(f"execute {i}")
+                    break
 
             #telemetry packet
-            elif self.orbit_adcs > self.comms_pass:
+            if self.orbit_adcs > self.comms_pass and self.state != "science":
                 self.state = "comms" 
                 self.comms_pass = self.comms_pass + 1 #TODO adapt to HAB positions
 
-            #orbit 7-10: transmit 5 images and text file
-            elif self.orbit_adcs > 6:
+            #orbit 8-10: transmit 5 images and text file
+            elif self.orbit_adcs > 7 and self.state != "science":
                 self.state = "comms"
                 self.image_comms = True
             #TODO: add checks for angle, etc to switch state 
@@ -72,17 +79,18 @@ class Cubesat:
         name = f"{self.prefix}_{self.cur_image}"
         self.cur_image = self.cur_image + 1
         
+        print(f"image at angle {self.adcs.get_yaw()}")
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
-        img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
+        habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw(), img.real2Img, img.E2PicCenter, img.centerOff)#TODO change constants
         
-        hab = 1 #find this from processing
+        hab_angle = 1 #find this from processing
         dist = 1
 
         #formulate data
         t = time.localtime()
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab}\nhab distance:{dist}")
+        f"angle: {self.adcs.get_yaw()}\nhab angle:{hab_angle}\nhab distance:{dist}")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
@@ -197,7 +205,6 @@ class Cubesat:
             elif np.mod(self.orbit, 1) < 0.7 and orbit_adcs > 260:
                 orbit_adcs = orbit_adcs - 360
             self.orbit_adcs = np.floor(self.orbit) + orbit_adcs / 360
-            print(self.orbit_adcs)
         
 if __name__ == "__main__":
     otherpi = sys.argv[1]#name of other pi hostname
