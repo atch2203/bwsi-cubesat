@@ -16,6 +16,7 @@ class Ground:
         self.commission()
         while self.orbit < 10:
             self.nominal_loop()
+        print("mission over")
 
     def nominal_loop(self):
         self.connection.connect_as_host(1)
