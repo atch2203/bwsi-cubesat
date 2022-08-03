@@ -18,6 +18,17 @@ class Cubesat:
         self.comms_pass = 0
         self.prefix = "image"
         #queues for sending
+
+        # TODO: check and uncomment the new science queue below 
+        #       if it's formatted correctly (changed the values 
+        #       to make more constant/stable and run in 2 orbit)
+
+        # self.science_queue = np.array([0, 60, 120, 180, 240, 300, 360+30, 360+90, 360+150, 360+210, 360+270, 360+330]) / 360
+        
+        # #revised angle order: 0-60-120-180-240-300-30-90-150-210-270-330
+        # #big leap from 300 to 30 degrees 
+
+
         self.science_queue = np.array([720+22, 360+53, 90, 360+112, 143, 360+180, 202, 360+233, 270, 360+292, 323, 360+360]) / 360
         self.process_queue = []
         self.image_queue = []
