@@ -1,5 +1,5 @@
 import time
-from time import strftime
+# from time import strftime
 from picamera import PiCamera
 import numpy as np
 import cv2
@@ -17,13 +17,18 @@ time.sleep(2)
 # path = "home/pi/CHARMS/Imaging/test_images/"
 
 '''
-DEPENDANTS:
+CONSTANTS:
 '''
 path = "test_images/"
 user = "rhea" #replace with your name
 real2Img = 100/258.49564793241683 # 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up
 E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
 centerOff = 45 
+
+
+'''
+Figure this out how to change it
+'''
 imu_angle = 0 #TODO get this info
 # real2Img  = 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
 # E2PicCenter = 271 #mm - subject to change - depending on each person's set-up
@@ -40,14 +45,20 @@ class HAB:
         self.central_angle = 0
         self.distance = 0
         self.sector = 0
+        self.path = ""
     def __str__(self):
         return str(self.x) + " " + str(self.y) + " \n"
+    def __eq__(self, other):
+        # if not isinstance(other, HAB):
+        #     return NotImplemented
+        return self.x == other.x and self.y == other.y and self.path == other.path
     
 
 
 def capture_image(imu_angle):
     #capture image
-    fileName = user + ".jpg"
+    timestr = time.strftime("%Y%m%d_%H%M%S")
+    fileName = user + timestr + ".jpg"
     # fileName = strftime("%X%x_" + user + ".jpg") #locale date_locale time_time zone
     camera.capture(path + fileName)
     # return image
@@ -58,6 +69,10 @@ def capture_image(imu_angle):
 
 
 #TODO rhea: fix this part with the constants
+'''
+finds HAB location supplied img path, imu_angle, other constants
+saves hab object 
+'''
 def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
     #constants
     real2Image_coef = real2Img  #= 0.3744906844618852 # mm/pixle - subject to change - depending on each person's set-up 
@@ -79,7 +94,8 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
 
     threshold = 1000
     red = 0
-    ret_habs = []
+
+    ret_habs = [] #returns only the HABS captured in this img
     
     for c in cnts:
         area = cv2.contourArea(c)
@@ -130,6 +146,7 @@ def find_HABs(img, imu_angle, real2Img, E2PicCenter, centerOff):
         temp_hab.x  = h_x = find_x(fin_angle, AC)
         temp_hab.y  = h_y = find_y(fin_angle, AC)
         temp_hab.sector = find_sector(h_x, h_y)
+        temp_hab.path = img
 
         ret_habs.append(temp_hab)
 
@@ -178,9 +195,55 @@ def find_sector(h_x, h_y):
         else:
             sector = 6
 
-    #can change this based on what return type needed
+    
     # return ("Sector: " + str(sector)) 
     return sector
+
+
+def remove_doubles():
+    in_margin = 1 #sets margin at +-1 inch in all directions from centroid
+    new_list = HAB_list[:]
+
+    list_len = len(new_list)
+    i = 0
+    j = 0
+
+    while i<list_len:
+        og_hab = new_list[i]
+        
+        while j<list_len:
+            new_hab = new_list[j]
+            
+            if(og_hab == new_hab):
+                j+=1
+            
+            else:
+                if(is_within(og_hab.x, og_hab.y, new_hab.x, new_hab.y,in_margin)):
+                    new_list.remove(new_hab)
+                    # i-=1 #resets the indexes accounting for removed
+                    j-=1
+                    list_len-=1
+                
+                #move forward
+                j+=1
+        
+        i+=1
+
+    return new_list
+
+
+
+
+
+        
+
+
+
+def is_within(x_o, y_o,x_n, y_n, margin):
+    if(abs(x_n-x_o)<margin and abs(y_n-y_o)<margin):
+        return True
+    return False
+
 
 
 #helper methods
@@ -223,4 +286,11 @@ if __name__ == "__main__":
 
     
     find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
+    find_HABs(capture_image(imu_angle), imu_angle, real2Img, E2PicCenter, centerOff)
+    print("before removal: ")
+    print(*HAB_list)
+    print("\nafter removal: ")
+    print(*remove_doubles())
+    print("\nold list:")
+    print(*HAB_list)
 
