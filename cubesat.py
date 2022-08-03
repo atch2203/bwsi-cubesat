@@ -94,15 +94,18 @@ class Cubesat:
         #take image and process it
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw())#TODO change constants
-        hab_angle, dist, sector = -1, -1, -1
+        x, y, hab_angle, dist, sector = 0, 0, -1, -1, -1
         if len(habs) > 0:
             hab_angle = habs[0].central_angle #find this from processing
             dist = habs[0].distance
             sector = habs[0].sector
+            x = habs[0].x
+            y = habs[0].y
+
 
         #formulate data
         t = time.localtime()
-        hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}" if sector != -1 else "\nno hab found"
+        hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}\nx:{x}\ny:{y}\n" if sector != -1 else "\nno hab found\n"
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}"
         f"{hab_data}\n")
