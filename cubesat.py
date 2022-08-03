@@ -23,13 +23,11 @@ class Cubesat:
         #       if it's formatted correctly (changed the values 
         #       to make more constant/stable and run in 2 orbit)
 
-        # self.science_queue = np.array([0, 60, 120, 180, 240, 300, 360+30, 360+90, 360+150, 360+210, 360+270, 360+330]) / 360
+        self.science_queue = np.array([0, 60, 120, 180, 240, 300, 360+30, 360+90, 360+150, 360+210, 360+270, 360+330]) / 360
         
         # #revised angle order: 0-60-120-180-240-300-30-90-150-210-270-330
         # #big leap from 300 to 30 degrees 
 
-
-        self.science_queue = np.array([720+22, 360+53, 90, 360+112, 143, 360+180, 202, 360+233, 270, 360+292, 323, 360+360]) / 360
         self.process_queue = []
         self.image_queue = []
         self.image_comms = False
@@ -105,7 +103,7 @@ class Cubesat:
         hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}" if sector != -1 else "\nno hab found"
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
         f"angle: {self.adcs.get_yaw()}"
-        hab_data)
+        f"{hab_data}")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
