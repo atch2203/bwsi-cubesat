@@ -7,6 +7,7 @@ import subprocess
 import time
 import threading
 import numpy as np
+import os
 
 class Cubesat:
     def __init__(self, otherpi):
@@ -227,11 +228,14 @@ class Cubesat:
 
     def sleep(self):
         print("sleep")
-        self.connection.connect_repeat_again_as_client(1, 3)
-        self.connection.write_raw("sleep")
-        self.connection.write_raw("done")
-        self.connection.close_all_connections()
-        #TODO: shutdown somehow: subprocess?
+        try:
+            self.connection.connect_repeat_again_as_client(1, 3)
+            self.connection.write_raw("sleep")
+            self.connection.write_raw("done")
+            self.connection.close_all_connections()
+        except:
+            print("error in connecting sleep")
+        os.system('sudo shutdown now')
     
     def safe(self):#TODO
         print("safe")
