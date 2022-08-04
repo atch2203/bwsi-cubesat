@@ -116,22 +116,25 @@ class Cubesat:
         img.camera.capture(f"/home/pi/CHARMS/Images/{name}.jpg")
         yaw = self.adcs.get_yaw()
         habs = img.find_HABs(f"/home/pi/CHARMS/Images/{name}.jpg", self.adcs.get_yaw())#TODO change constants
-        area, x, y, hab_angle, dist, sector = -1, 0, 0, -1, -1, -1
-        if len(habs) > 0:
-            hab_angle = habs[0].central_angle #find this from processing
-            dist = habs[0].distance
-            sector = habs[0].sector
-            x = habs[0].x
-            y = habs[0].y
-            area = habs[0].area
-
-
+        
         #formulate data
         t = time.localtime()
-        hab_data = f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}\nx:{x}\ny:{y}\narea:{area}" if sector != -1 else "\nno hab found"
+        hab_data = "no hab found"
+        if len(habs) > 0:
+            hab_data = ""
+            for hab in habs:
+                hab_angle = hab.central_angle #find this from processing
+                dist = hab.distance
+                sector = hab.sector
+                x = hab.x
+                y = hab.y
+                area = hab.area
+                hab_data += f"\nhab angle:{hab_angle}\nhab distance:{dist}\nsector:{sector}\nx:{x}\ny:{y}\narea:{area}\n" 
+
+ 
         data = (f"{name}\n{time.strftime('%H:%M:%S', t)}\n"
-        f"angle: {yaw}"
-        f"{hab_data}\n\n")
+        f"angle: {yaw}\n"
+        f"{hab_data}\n")
         
         #write data
         with open(f"/home/pi/CHARMS/Images/{name}.txt", "w") as f:
