@@ -129,15 +129,8 @@ def find_HABs(img, imu_angle):
         #drawing 
         #cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
         #cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
-        cv2.imwrite(img[:-4] + "_mask.jpg", image)
-        
-        
-        # cv2.imshow('Red Mask', red_mask)
-        
-        # cv2.waitKey()
-        # cv2.destroyAllWindows()
-
-
+        cv2.imwrite(img[:-4] + "_mask.jpg", mask)
+       
         # off_set angle of hab from IMU current angle aka camera orientation calculation
         OB = calculateDistance(375, 335 - center_offset, 750, 335 - center_offset) #edge to actual center
         OC = calculateDistance(375, 335 - center_offset, cX, cY) #distance: hab to actual center
