@@ -36,7 +36,7 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 60 #seconds per orbit
+        self.time_scale = 20 #seconds per orbit
         self.cycle = 0.5 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
@@ -281,9 +281,9 @@ class Cubesat:
             self.orbit = (time.time() - self.start_time) / self.time_scale 
             orbit_adcs = self.adcs.get_yaw()
             #correct for imprecision in orbit
-            if np.mod(self.orbit, 1) > 0.2 and orbit_adcs < 60:
+            if np.mod(self.orbit, 1) > 0.75 and orbit_adcs < 90:
                 orbit_adcs = orbit_adcs + 360
-            elif np.mod(self.orbit, 1) < 0.8 and orbit_adcs > 300:
+            elif np.mod(self.orbit, 1) < 0.25 and orbit_adcs > 270:
                 orbit_adcs = orbit_adcs - 360
             self.orbit_adcs = np.floor(self.orbit) + orbit_adcs / 360
         
