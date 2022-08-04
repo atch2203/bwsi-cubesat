@@ -15,6 +15,7 @@ class Cubesat:
         #img.set_user_values("ivy", 0.38122911022229045, 209.84756372185979, -3)
         #img.set_user_values("stephen",0.3744906844618852, 271, 27)
         #img.set_user_values("hannah", 0.4077146200289641, 289, 25)
+        img.set_user_values("rhea", 100/258.49564793241683, 271, 45)
         self.otherpi = otherpi
         self.adcs = ADCS()
         self.state = "commission"
