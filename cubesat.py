@@ -200,8 +200,6 @@ class Cubesat:
     def commission(self):
         print("commission")
         
-        #ADCS init
-        self.adcs.calibrate(10)
         
         #Comms test/init
         print("running connection test")
@@ -209,9 +207,11 @@ class Cubesat:
         print("connected and waiting for ready")
         self.connection.receive_raw()
         print("ready received")
-        self.adcs.initial_angle(True)
+        #ADCS init
+        self.adcs.calibrate(10)
         self.connection.write_raw("got_ready")
         self.connection.receive_raw()
+        self.adcs.initial_angle(True)
         print("start received")
         self.connection.close_all_connections()
         

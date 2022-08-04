@@ -17,6 +17,10 @@ class ADCS:
 
     def calibrate(self, t):
 
+        i2c = busio.I2C(board.SCL, board.SDA)
+        sensor1 = adafruit_fxos8700.FXOS8700(i2c)
+        sensor2 = adafruit_fxas21002c.FXAS21002C(i2c)
+
         print("Magnetometer Calibration")
         print("Start moving the board in all directions")
         print("When the magnetic Hard Offset values stop")
