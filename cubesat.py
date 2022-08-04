@@ -36,7 +36,7 @@ class Cubesat:
         self.image_queue = []
         self.image_comms = False
         #orbit constants
-        self.time_scale = 20 #seconds per orbit
+        self.time_scale = 60 #seconds per orbit
         self.cycle = 0.5 #wait time per nominal cycle
         
         self.cur_image = 1#TODO change this
