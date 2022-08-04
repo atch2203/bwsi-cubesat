@@ -214,6 +214,8 @@ class Cubesat:
         self.connection.receive_raw()
         self.adcs.initial_angle(True)
         print("start received")
+        self.connection.write_raw("got_start")
+        self.connection.receive_raw()
         self.connection.close_all_connections()
         
         #ADCS start, start
