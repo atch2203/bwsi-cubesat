@@ -7,7 +7,7 @@ import subprocess
 import time
 import threading
 import numpy as np
-import os
+#import os
 
 class Cubesat:
     def __init__(self, otherpi):
@@ -235,7 +235,7 @@ class Cubesat:
             self.connection.close_all_connections()
         except:
             print("error in connecting sleep")
-        os.system('sudo shutdown now')
+        #os.system('sudo shutdown now')
     
     def safe(self):#TODO
         print("safe")

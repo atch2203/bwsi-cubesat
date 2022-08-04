@@ -1,4 +1,0 @@
-image_8
-14:02:42
-angle: 90.73526432488069
-no hab found
