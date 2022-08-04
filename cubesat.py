@@ -12,7 +12,7 @@ import numpy as np
 class Cubesat:
     def __init__(self, otherpi):
         img.set_user_values("alex", 0.37938867461135106, 271, 31)
-        $img.set_user_values("ivy", 0.38122911022229045, 209.84756372185979, -3)
+        #img.set_user_values("ivy", 0.38122911022229045, 209.84756372185979, -3)
         #img.set_user_values("stephen",0.3744906844618852, 271, 27)
         #img.set_user_values("hannah", 0.4077146200289641, 289, 25)
         self.otherpi = otherpi
