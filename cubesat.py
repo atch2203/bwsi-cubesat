@@ -141,7 +141,7 @@ class Cubesat:
             f.write(data)
         
         #add to self.image_queue depending on quality of image
-        if sector != -1:
+        if len(habs) > 0:
             print("found hab")
             if self.prefix == "retake": #don't add initial images
                 self.image_queue.append(name)
