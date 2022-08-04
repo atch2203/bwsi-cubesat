@@ -35,11 +35,11 @@ class ADCS:
         while time.time() - start_time < t:
             mag_x, mag_y, mag_z = sensor1.magnetometer
 
-            print(
-                "Magnetometer: X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
-                    mag_x, mag_y, mag_z
-                )
-            )
+            #print(
+            #    "Magnetometer: X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
+            #        mag_x, mag_y, mag_z
+            #    )
+            #)
 
             min_x = min(min_x, mag_x)
             min_y = min(min_y, mag_y)
@@ -67,17 +67,17 @@ class ADCS:
                 scale_y = avg_delta / avg_delta_y
                 scale_z = avg_delta / avg_delta_z
 
-            print(
-                "Hard Offset:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
-                    offset_x, offset_y, offset_z
-                )
-            )
-            print(
-                "Field:        X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
-                    avg_delta_x, avg_delta_y, avg_delta_z
-                )
-            )
-            print("")
+            #print(
+            #    "Hard Offset:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
+            #        offset_x, offset_y, offset_z
+            #    )
+            #)
+            #print(
+            #    "Field:        X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} uT".format(
+            #        avg_delta_x, avg_delta_y, avg_delta_z
+            #    )
+            #)
+            #print("")
             time.sleep(0.01)
 
         mag_calibration = (offset_x, offset_y, offset_z, scale_x, scale_y, scale_z)

@@ -107,6 +107,9 @@ class Cubesat:
         
         name = f"{self.prefix}_{self.cur_image}"
         if self.prefix == "retake":
+            print(self.angle_index)
+            print(np.mod(self.orbit_adcs, 1))
+            print(self.find_index(np.mod(self.orbit_adcs, 1), self.angle_index, 16))
             name = f"{self.prefix}_{self.find_index(np.mod(self.orbit_adcs, 1), self.angle_index, 16)}_{np.floor(self.orbit_adcs)}"
         else:
             self.cur_image = self.cur_image + 1
