@@ -117,7 +117,7 @@ def find_HABs(img, imu_angle):
         #red+=area #unnecessary?
         if(area<threshold):
             continue
-        cv2.drawContours(image,[c],-1,(0,255,0),3) #can comment out after completing integration
+        #cv2.drawContours(image,[c],-1,(0,255,0),3) #can comment out after completing integration
         M =  cv2.moments(c)
         if M["m00"] == 0:
             cX=0
@@ -127,8 +127,8 @@ def find_HABs(img, imu_angle):
             cY = int(M["m01"] / M["m00"])
             
         #drawing 
-        cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
-        cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
+        #cv2.circle(image, (cX, cY), 5, (0, 255, 0), -1) #comment out after completing integration
+        #cv2.putText(image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 0), 2) #same as above
         cv2.imwrite(img[:-4] + "_mask.jpg", image)
         
         
