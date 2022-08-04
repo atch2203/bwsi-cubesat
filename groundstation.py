@@ -72,6 +72,7 @@ class Ground:
         print("Press enter to start mission")
         a = input()
         self.connection.write_raw("really start")
+        print("mission started")
         self.connection.close_all_connections()
     
     def telemetry(self):
